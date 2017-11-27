@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 
 [dependencies]
-ethabi = { path = "../../ethabi/ethabi"}
-ethabi-derive = { path = "../../ethabi/derive"}
-ethabi-contract = { path = "../../ethabi/contract"}
+ethabi = { git = "https://github.com/tomusdrw/ethabi.git" }
+ethabi-derive = { git = "https://github.com/tomusdrw/ethabi.git"}
+ethabi-contract = { git = "https://github.com/tomusdrw/ethabi.git"}
 # ethabi = "4.2"
 # ethabi-contract = "4.0"
 # ethabi-derive = "4.2"
