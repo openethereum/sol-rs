@@ -1,0 +1,13 @@
+[package]
+name = "solaris-example"
+version = "0.1.0"
+authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
+
+[dependencies]
+ethabi = { path = "../../ethabi/ethabi"}
+ethabi-derive = { path = "../../ethabi/derive"}
+ethabi-contract = { path = "../../ethabi/contract"}
+# ethabi = "4.2"
+# ethabi-contract = "4.0"
+# ethabi-derive = "4.2"
+solaris = { path = "../solaris", version = "0.1" }
