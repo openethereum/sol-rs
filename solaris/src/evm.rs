@@ -17,6 +17,7 @@ pub struct Evm {
     value: U256,
     gas: U256,
     gas_price: U256,
+    logs: Vec<ethcore::log_entry::LogEntry>,
 }
 
 impl Default for Evm {
@@ -35,6 +36,7 @@ impl Evm {
             gas: 1_000_000.into(),
             gas_price: 0.into(),
             value: 0.into(),
+            logs: vec![],
         }
     }
 
@@ -118,6 +120,11 @@ impl Evm {
         self
     }
 
+    pub fn logs(&self, _filter: ::ethabi::TopicFilter) -> Vec<()> {
+        // TODO [ToDr] Add filter querying
+        self.logs.iter().map(|_| ()).collect()
+    }
+
     /// Run the EVM and panic on all errors.
     pub fn run<F>(self, func: F) where
         F: FnOnce(Self) -> ::ethabi::Result<()>,
@@ -178,7 +185,9 @@ impl<'a> ethabi::Caller for &'a mut Evm {
 
         let tracers = self.tracers();
         match self.evm.transact(&env_info, transaction, tracers.0, tracers.1) {
-            TransactResult::Ok { output, gas_left, .. } => {
+            TransactResult::Ok { output, gas_left, logs, .. } => {
+                self.logs.extend(logs);
+
                 // TODO [ToDr] Shitty detection of failed calls?
                 if gas_left > 0.into() {
                     Ok(output)
