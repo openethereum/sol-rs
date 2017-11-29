@@ -17,6 +17,10 @@ addons:
       - libudev-dev
       - libssl-dev
       - pkg-config
+      - nodejs
+
+install:
+  - npm install -g solcjs
 
 script:
   - cargo check --all
