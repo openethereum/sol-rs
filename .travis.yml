@@ -20,6 +20,7 @@ addons:
       - nodejs
 
 install:
+  - npm install -g npm@latest
   - npm install -g solcjs
 
 script:
