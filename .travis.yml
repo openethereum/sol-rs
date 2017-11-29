@@ -11,6 +11,13 @@ matrix:
   include:
     - rust: stable
 
+addons:
+  apt:
+    packages:
+      - libudev-dev
+      - libssl-dev
+      - pkg-config
+
 script:
   - cargo check --all
   - cargo test --all
