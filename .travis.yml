@@ -17,11 +17,10 @@ addons:
       - libudev-dev
       - libssl-dev
       - pkg-config
-      - nodejs
 
-install:
-  - npm install -g npm@latest
-  - npm install -g solcjs
+before_install:
+  - nvm install 8
+  - npm install -g solc
 
 script:
   - cargo check --all
