@@ -7,7 +7,9 @@ authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 ethabi = { git = "https://github.com/tomusdrw/ethabi.git" }
 ethabi-derive = { git = "https://github.com/tomusdrw/ethabi.git"}
 ethabi-contract = { git = "https://github.com/tomusdrw/ethabi.git"}
-# ethabi = "4.2"
-# ethabi-contract = "4.0"
-# ethabi-derive = "4.2"
 solaris = { path = "../solaris", version = "0.1" }
+ethereum-types = { git = "https://github.com/paritytech/primitives.git" }
+rustc-hex = "1.0"
+
+[build-dependencies]
+solc = { path = "../solc", version = "0.1" }
