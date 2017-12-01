@@ -32,19 +32,20 @@ fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {
 #[test]
 fn badge_reg_test_fee() {
     let (mut evm, contract) = setup();
+    let reg = contract.functions();
 
     // Initial fee is 1 ETH
-    assert_eq!(unit::convert(contract.functions().fee().call(&mut evm).unwrap()), unit::ether(1));
+    assert_eq!(unit::convert(reg.fee().call(&mut evm).unwrap()), unit::ether(1));
 
     // The owner should be able to set the fee
-    contract.functions().set_fee().transact(unit::gwei(10), &mut evm).unwrap();
+    reg.set_fee().transact(unit::gwei(10), &mut evm).unwrap();
 
     // Fee should be updated
-    assert_eq!(unit::convert(contract.functions().fee().call(&mut evm).unwrap()), unit::gwei(10));
+    assert_eq!(unit::convert(reg.fee().call(&mut evm).unwrap()), unit::gwei(10));
 
     // Other address should not be allowed to change the fee
     evm.with_sender(10.into());
-    contract.functions().set_fee().transact(unit::gwei(10), &mut evm).unwrap_err();
+    reg.set_fee().transact(unit::gwei(10), &mut evm).unwrap_err();
 }
 
 #[test]
