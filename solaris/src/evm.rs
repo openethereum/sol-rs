@@ -74,7 +74,8 @@ impl Evm {
                 self.contract_address = contract_address.map(|x| (&*x).into());
                 Ok(Default::default())
             },
-            TransactResult::Err { .. } => {
+            TransactResult::Err { .. } @ err => {
+                println!("Unable to deploy contract: {:?}", err);
                 Err(())
             },
         }
@@ -115,7 +116,9 @@ impl Evm {
             data: vec![],
         }.fake_sign(sender);
 
-        self.evm.transact(&env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer);
+        match self.evm.transact(&env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer) {
+            TransactResult::Err { .. } @ e => panic!("Unable to top-up account: {:?}", e),
+        }
 
         self
     }
