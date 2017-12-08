@@ -46,7 +46,7 @@ impl Evm {
 
     fn env_info(&self) -> client::EnvInfo {
         client::EnvInfo {
-            number: 1u64,
+            number: 5_000_000u64,
             author: 0.into(),
             timestamp: 1u64,
             difficulty: 1.into(),
