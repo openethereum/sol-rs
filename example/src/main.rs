@@ -7,7 +7,6 @@ extern crate ethereum_types as types;
 extern crate rustc_hex;
 extern crate solaris;
 
-use rustc_hex::FromHex;
 
 fn main() {
     solaris::main(include_bytes!("../res/BadgeReg_sol_BadgeReg.abi"));
@@ -27,6 +26,8 @@ fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {
     (evm, contract)
 }
 
+#[cfg(test)]
+use rustc_hex::FromHex;
 #[cfg(test)]
 use solaris::unit;
 #[cfg(test)]
