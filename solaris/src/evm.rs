@@ -189,14 +189,26 @@ impl<'a> ethabi::Caller for &'a mut Evm {
 
         let tracers = self.tracers();
         match self.evm.transact(&env_info, transaction, tracers.0, tracers.1) {
-            TransactResult::Ok { output, gas_left, logs, .. } => {
+            TransactResult::Ok { output, gas_left, logs, outcome, .. } => {
                 self.logs.extend(logs);
 
-                // TODO [ToDr] Shitty detection of failed calls?
-                if gas_left > 0.into() {
-                    Ok(output)
-                } else {
-                    Err(format!("Call failed."))
+                match outcome {
+                    ethcore::receipt::TransactionOutcome::Unknown |
+                    ethcore::receipt::TransactionOutcome::StateRoot(_) => {
+                        // TODO [ToDr] Shitty detection of failed calls?
+                        if gas_left > 0.into() {
+                            Ok(output)
+                        } else {
+                            Err(format!("Call went out of gas."))
+                        }
+                    },
+                    ethcore::receipt::TransactionOutcome::StatusCode(status) => {
+                        if status == 1 {
+                            Ok(output)
+                        } else {
+                            Err(format!("Call failed with status code: {}", status))
+                        }
+                    },
                 }
             },
             err => {
