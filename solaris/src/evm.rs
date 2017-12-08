@@ -46,7 +46,7 @@ impl Evm {
 
     fn env_info(&self) -> client::EnvInfo {
         client::EnvInfo {
-            number: 1u64,
+            number: 5_000_000u64,
             author: 0.into(),
             timestamp: 1u64,
             difficulty: 1.into(),
@@ -74,7 +74,7 @@ impl Evm {
                 self.contract_address = contract_address.map(|x| (&*x).into());
                 Ok(Default::default())
             },
-            TransactResult::Err { .. } @ err => {
+            err @ TransactResult::Err { .. } => {
                 println!("Unable to deploy contract: {:?}", err);
                 Err(())
             },
@@ -117,7 +117,8 @@ impl Evm {
         }.fake_sign(sender);
 
         match self.evm.transact(&env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer) {
-            TransactResult::Err { .. } @ e => panic!("Unable to top-up account: {:?}", e),
+            e @ TransactResult::Err { .. } => panic!("Unable to top-up account: {:?}", e),
+            _ => {},
         }
 
         self
