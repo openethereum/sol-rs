@@ -5,13 +5,26 @@ use ethcore::trace;
 use ethcore_bytes::{Bytes, ToPretty};
 use vm;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct PrintingTracer {
     vm_enabled: bool,
     depth: usize,
     pc: usize,
     instruction: u8,
     stack: Vec<U256>,
+}
+
+impl Default for PrintingTracer {
+    fn default() -> Self {
+        let vm_enabled = ::std::env::var("SOLARIS_VM_TRACES").is_ok();
+        PrintingTracer {
+            vm_enabled,
+            depth: 0,
+            pc: 0,
+            instruction: 0,
+            stack: Vec::new(),
+        }
+    }
 }
 
 fn u256_as_str(v: &U256) -> String {
