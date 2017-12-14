@@ -18,6 +18,10 @@ addons:
       - libssl-dev
       - pkg-config
 
+before_install:
+  - nvm install 8
+  - npm install -g solc
+
 script:
   - cargo check --all
   - cargo test --all
