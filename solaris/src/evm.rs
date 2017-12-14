@@ -33,7 +33,7 @@ impl Evm {
             evm,
             sender: 0.into(),
             contract_address: None,
-            gas: 1_000_000.into(),
+            gas: 4_000_000.into(),
             gas_price: 0.into(),
             value: 0.into(),
             logs: vec![],
