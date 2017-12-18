@@ -5,13 +5,26 @@ use ethcore::trace;
 use ethcore_bytes::{Bytes, ToPretty};
 use vm;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct PrintingTracer {
     vm_enabled: bool,
     depth: usize,
     pc: usize,
     instruction: u8,
     stack: Vec<U256>,
+}
+
+impl Default for PrintingTracer {
+    fn default() -> Self {
+        let vm_enabled = ::std::env::var("SOLARIS_VM_TRACES").is_ok();
+        PrintingTracer {
+            vm_enabled,
+            depth: 0,
+            pc: 0,
+            instruction: 0,
+            stack: Vec::new(),
+        }
+    }
 }
 
 fn u256_as_str(v: &U256) -> String {
@@ -129,7 +142,7 @@ impl trace::VMTracer for PrintingTracer {
         true
     }
 
-    fn trace_executed(&mut self, _gas_used: U256, stack_push: &[U256], _mem_diff: Option<(usize, &[u8])>, _store_diff: Option<(U256, U256)>) {
+    fn trace_executed(&mut self, gas_used: U256, stack_push: &[U256], _mem_diff: Option<(usize, &[u8])>, _store_diff: Option<(U256, U256)>) {
         if !self.vm_enabled {
             return;
         }
@@ -141,13 +154,14 @@ impl trace::VMTracer for PrintingTracer {
         self.stack.extend_from_slice(stack_push);
 
         println!(
-            "{}[{}] {}({:x}) stack_after: {}",
+            "{}[{}] {}({:x}) stack_after: {}, gas_left: {}",
             self.depth(),
             self.pc,
             info.name,
             self.instruction,
-            self.stack()
-            );
+            self.stack(),
+            gas_used,
+        );
     }
 
     fn prepare_subtrace(&self, _code: &[u8]) -> Self where Self: Sized {
