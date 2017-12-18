@@ -231,3 +231,11 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         self.evm_transact(&env_info, transaction, true, |_, output, _| Ok(output))
     }
 }
+
+/// converts an `ethcore::log_entry::LogEntry` to an `ethabi::RawLog`
+/// since the events in a contract derived with `ethabi` can only
+/// be parsed from `ethabi::RawLog` (via `event.parse_log(raw_log`).
+fn log_entry_to_raw_log(log_entry: &ethcore::log_entry::LogEntry) -> ethabi::RawLog {
+	let topics: Vec<ethabi::Hash> = log_entry.topics.iter().map(|x| x.0).collect();
+	ethabi::RawLog::from((topics, log_entry.data.clone()))
+}
