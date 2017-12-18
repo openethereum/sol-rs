@@ -222,8 +222,16 @@ impl Evm {
         self
     }
 
-    pub fn logs(&self) -> Vec<ethcore::log_entry::LogEntry> {
-        self.logs.clone()
+    pub fn logs<T: Into<Option<ethabi::TopicFilter>>>(
+        &self, maybe_filter: T
+    ) -> Vec<ethabi::RawLog> {
+        let iter = self.logs.iter().map(log_entry_to_raw_log);
+        match maybe_filter.into() {
+            None => iter.collect(),
+            Some(ref filter) => {
+                iter.filter(|log| is_log_in_filter(filter, &log)).collect()
+            },
+        }
     }
 
     /// Run the EVM and panic on all errors.
