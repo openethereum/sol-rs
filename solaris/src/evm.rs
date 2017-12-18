@@ -116,9 +116,8 @@ impl Evm {
         self
     }
 
-    pub fn logs(&self, _filter: ::ethabi::TopicFilter) -> Vec<()> {
-        // TODO [ToDr] Add filter querying
-        self.logs.iter().map(|_| ()).collect()
+    pub fn logs(&self) -> Vec<ethcore::log_entry::LogEntry> {
+        self.logs.clone()
     }
 
     /// Run the EVM and panic on all errors.
