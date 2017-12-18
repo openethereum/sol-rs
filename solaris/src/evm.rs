@@ -326,3 +326,11 @@ fn is_in_topic<T: PartialEq>(topic: &ethabi::Topic<T>, maybe_value: Option<&T>) 
         _ => false
     }
 }
+
+/// we should probably move this inside the `TopicFilter` type in the `ethabi` crate
+fn is_log_in_filter(filter: &ethabi::TopicFilter, raw_log: &ethabi::RawLog) -> bool {
+    is_in_topic(&filter.topic0, raw_log.topics.get(0)) &&
+    is_in_topic(&filter.topic1, raw_log.topics.get(1)) &&
+    is_in_topic(&filter.topic2, raw_log.topics.get(2)) &&
+    is_in_topic(&filter.topic3, raw_log.topics.get(3))
+}
