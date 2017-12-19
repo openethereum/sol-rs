@@ -1,3 +1,5 @@
+/// conversion of the various ether units (shannon, gwei, ...) to wei
+
 use types::U256;
 
 lazy_static! {
