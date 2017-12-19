@@ -81,7 +81,7 @@ fn anyone_should_be_able_to_register_a_badge() {
         // Test that it was registered correctly
         assert_eq!(
             reg.from_name().call(convert::bytes32("test"), &mut evm)?,
-            (convert::raw::uint(0), convert::raw::address(10), convert::raw::address(5), )
+            (convert::raw::u64_to_be_bytes32(0), convert::raw::address(10), convert::raw::address(5), )
             );
 
         Ok(())
