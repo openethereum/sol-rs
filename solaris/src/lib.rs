@@ -9,6 +9,10 @@ extern crate vm;
 #[macro_use]
 extern crate lazy_static;
 
+/// re-export these for now since they provide useful conversion from
+/// integer primitives and to byte arrays (which are required by the ethabi for now)
+pub use types::{U256, Address};
+
 mod trace;
 
 pub mod evm;
