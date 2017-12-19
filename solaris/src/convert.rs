@@ -27,10 +27,6 @@ pub fn bytes32(s: &str) -> [u8; 32] {
     ret
 }
 
-pub fn uint(num: u64) -> types::U256 {
-    num.into()
-}
-
 pub fn u256_from_bytes32(v: [u8; 32]) -> types::U256 {
     v.into()
 }
