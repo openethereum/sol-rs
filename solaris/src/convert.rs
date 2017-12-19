@@ -41,12 +41,12 @@ pub fn u256_from_bytes32(v: [u8; 32]) -> types::U256 {
     v.into()
 }
 
-pub fn convert_u256(x: types::U256) -> bigint::uint::U256 {
+pub(crate) fn convert_u256(x: types::U256) -> bigint::uint::U256 {
     let mut bytes = [0; 32];
     x.to_big_endian(&mut bytes);
     bytes.into()
 }
 
-pub fn address_to_hash(x: types::Address) -> bigint::hash::H160 {
+pub(crate) fn address_to_hash(x: types::Address) -> bigint::hash::H160 {
     (&*x).into()
 }
