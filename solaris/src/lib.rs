@@ -30,4 +30,3 @@ pub fn main(_json_bytes: &[u8]) {
 pub fn evm() -> evm::Evm {
     evm::Evm::default()
 }
-
