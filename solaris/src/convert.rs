@@ -1,4 +1,5 @@
 use types;
+use bigint;
 
 // TODO [ToDr] Throw away module after
 // ethabi uses proper types.
@@ -38,4 +39,14 @@ pub fn uint(num: u64) -> types::U256 {
 
 pub fn u256_from_bytes32(v: [u8; 32]) -> types::U256 {
     v.into()
+}
+
+pub fn convert_u256(x: types::U256) -> bigint::uint::U256 {
+    let mut bytes = [0; 32];
+    x.to_big_endian(&mut bytes);
+    bytes.into()
+}
+
+pub fn convert_address(x: types::Address) -> bigint::hash::H160 {
+    (&*x).into()
 }

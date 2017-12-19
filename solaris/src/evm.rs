@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use bigint;
 use ethabi;
 use ethcore::client::{EvmTestClient, TransactResult};
 use ethcore::{self, transaction};
@@ -8,6 +7,7 @@ use types::{Address, U256};
 use vm;
 
 use trace;
+use convert::{convert_u256, convert_address};
 
 #[derive(Debug)]
 pub struct Evm {
@@ -229,14 +229,4 @@ impl<'a> ethabi::Caller for &'a mut Evm {
 
         self.evm_transact(&env_info, transaction, true, |_, output, _| Ok(output))
     }
-}
-
-fn convert_u256(x: U256) -> bigint::uint::U256 {
-    let mut bytes = [0; 32];
-    x.to_big_endian(&mut bytes);
-    bytes.into()
-}
-
-fn convert_address(x: Address) -> bigint::hash::H160 {
-    (&*x).into()
 }
