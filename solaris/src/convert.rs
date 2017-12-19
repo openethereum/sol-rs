@@ -9,10 +9,6 @@ pub mod raw {
     }
 }
 
-pub fn address(num: u64) -> types::Address {
-    num.into()
-}
-
 pub fn bytes32(s: &str) -> [u8; 32] {
     let bytes = s.as_bytes();
     let mut ret = [0u8; 32];
