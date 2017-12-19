@@ -47,6 +47,6 @@ pub fn convert_u256(x: types::U256) -> bigint::uint::U256 {
     bytes.into()
 }
 
-pub fn convert_address(x: types::Address) -> bigint::hash::H160 {
+pub fn address_to_hash(x: types::Address) -> bigint::hash::H160 {
     (&*x).into()
 }
