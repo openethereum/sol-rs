@@ -15,7 +15,7 @@ lazy_static! {
     pub static ref KWEI: U256 = U256::from(10).pow(3.into());
 }
 
-/// returns `value` converted from ether to wei
+/// returns `value` converted from tether to wei
 pub fn from_tether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *TETHER
 }
