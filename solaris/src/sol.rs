@@ -36,6 +36,6 @@ pub fn uint(num: u64) -> types::U256 {
     num.into()
 }
 
-pub fn convert(v: [u8; 32]) -> types::U256 {
+pub fn u256_from_bytes32(v: [u8; 32]) -> types::U256 {
     v.into()
 }
