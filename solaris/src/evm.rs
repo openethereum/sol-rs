@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use bigint;
 use ethabi;
 use ethcore::client::{EvmTestClient, TransactResult};
 use ethcore::{self, transaction};
@@ -7,7 +8,6 @@ use types::{Address, U256};
 use vm;
 
 use trace;
-use convert::{convert_u256, address_to_hash};
 
 #[derive(Debug)]
 pub struct Evm {
@@ -58,7 +58,7 @@ impl Evm {
 
     pub fn deploy(&mut self, code: &[u8]) -> Result<Address, String> {
         let env_info = self.env_info();
-        let nonce = self.evm.state().nonce(&address_to_hash(self.sender)).expect(STATE);
+        let nonce = self.evm.state().nonce(&convert_address(self.sender)).expect(STATE);
         let transaction = transaction::Transaction {
             nonce,
             gas_price: convert_u256(self.gas_price),
@@ -104,7 +104,7 @@ impl Evm {
             nonce,
             gas_price: 0.into(),
             gas: 21_000.into(),
-            action: transaction::Action::Call(address_to_hash(self.sender)),
+            action: transaction::Action::Call(convert_address(self.sender)),
             value: convert_u256(self.value),
             data: vec![],
         }.fake_sign(sender);
@@ -187,12 +187,12 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let mut params = vm::ActionParams::default();
-        params.sender = address_to_hash(self.sender);
-        params.origin = address_to_hash(self.sender);
-        params.address = address_to_hash(contract_address);
-        params.code_address = address_to_hash(contract_address);
+        params.sender = convert_address(self.sender);
+        params.origin = convert_address(self.sender);
+        params.address = convert_address(contract_address);
+        params.code_address = convert_address(contract_address);
         params.code = self.evm.state()
-            .code(&address_to_hash(contract_address)).expect(STATE);
+            .code(&convert_address(contract_address)).expect(STATE);
         params.data = Some((&*bytes).into());
         params.call_type = vm::CallType::Call;
         params.value = vm::ActionValue::Transfer(convert_u256(self.value));
@@ -217,16 +217,32 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let env_info = self.env_info();
-        let nonce = self.evm.state().nonce(&address_to_hash(self.sender)).expect(STATE);
+        let nonce = self.evm.state().nonce(&convert_address(self.sender)).expect(STATE);
         let transaction = transaction::Transaction {
             nonce,
             gas_price: convert_u256(self.gas_price),
             gas: convert_u256(self.gas),
-            action: transaction::Action::Call(address_to_hash(contract_address)),
+            action: transaction::Action::Call(convert_address(contract_address)),
             value: convert_u256(self.value),
             data: bytes.to_vec(),
-        }.fake_sign(address_to_hash(self.sender));
+        }.fake_sign(convert_address(self.sender));
 
         self.evm_transact(&env_info, transaction, true, |_, output, _| Ok(output))
     }
+}
+
+// TODO [snd] hopefully one day the `vm` crate in the parity repo
+// will use the `primitives` crate and we won't have to convert
+// between those functionally identical types
+fn convert_u256(x: U256) -> bigint::uint::U256 {
+    let mut bytes = [0; 32];
+    x.to_big_endian(&mut bytes);
+    bytes.into()
+}
+
+// TODO [snd] hopefully one day the `vm` crate in the parity repo
+// will use the `primitives` crate and we won't have to convert
+// between those functionally identical types
+fn convert_address(x: Address) -> bigint::hash::H160 {
+    (&*x).into()
 }
