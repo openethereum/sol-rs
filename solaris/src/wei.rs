@@ -46,7 +46,7 @@ pub fn from_finney<T: Into<U256>>(v: T) -> U256 {
 }
 
 pub fn from_szabo<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *FINNEY
+    v.into() * *SZABO
 }
 
 pub fn from_gwei<T: Into<U256>>(v: T) -> U256 {
