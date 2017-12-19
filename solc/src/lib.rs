@@ -3,7 +3,7 @@ mod platform {
 	use std::process::Command;
 
 	pub fn solc() -> Command {
-        Command::new("solcjs")
+        Command::new("solc")
 	}
 }
 
@@ -29,6 +29,8 @@ pub fn compile<T: AsRef<Path>>(path: T) {
     command
 		.arg("--bin")
 		.arg("--abi")
+		.arg("-o .")
+        .arg("--overwrite")
         .arg("--optimize");
 
     for file in sol_files(&path).expect("Contracts directory is not readable.") {
