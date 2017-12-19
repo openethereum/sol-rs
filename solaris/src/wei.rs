@@ -31,7 +31,7 @@ pub fn from_mether<T: Into<U256>>(value: T) -> U256 {
 }
 
 /// returns `value` converted from kether/grand/einstein to wei
-pub fn from_einstein<T: Into<U256>>(value: T) -> U256 {
+pub fn from_kether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KETHER
 }
 
@@ -41,7 +41,7 @@ pub fn from_grand<T: Into<U256>>(value: T) -> U256 {
 }
 
 /// returns `value` converted from kether/grand/einstein to wei
-pub fn from_kether<T: Into<U256>>(value: T) -> U256 {
+pub fn from_einstein<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KETHER
 }
 
