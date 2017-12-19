@@ -1,14 +1,6 @@
 use types;
 use bigint;
 
-// TODO [ToDr] Throw away module after
-// ethabi uses proper types.
-pub mod raw {
-    pub fn bytes32(s: &str) -> [u8; 32] {
-        super::bytes32(s)
-    }
-}
-
 pub fn bytes32(s: &str) -> [u8; 32] {
     let bytes = s.as_bytes();
     let mut ret = [0u8; 32];
