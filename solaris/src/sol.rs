@@ -35,3 +35,7 @@ pub fn bytes32(s: &str) -> [u8; 32] {
 pub fn uint(num: u64) -> types::U256 {
     num.into()
 }
+
+pub fn convert(v: [u8; 32]) -> types::U256 {
+    v.into()
+}

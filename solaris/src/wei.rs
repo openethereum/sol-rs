@@ -76,7 +76,3 @@ pub fn from_ada<T: Into<U256>>(v: T) -> U256 {
 pub fn from_wei<T: Into<U256>>(v: T) -> U256 {
     v.into()
 }
-
-pub fn convert(v: [u8; 32]) -> U256 {
-    v.into()
-}

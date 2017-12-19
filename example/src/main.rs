@@ -39,13 +39,13 @@ fn badge_reg_test_fee() {
     let reg = contract.functions();
 
     // Initial fee is 1 ETH
-    assert_eq!(wei::convert(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
+    assert_eq!(sol::convert(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
 
     // The owner should be able to set the fee
     reg.set_fee().transact(wei::from_gwei(10), &mut evm).unwrap();
 
     // Fee should be updated
-    assert_eq!(wei::convert(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
+    assert_eq!(sol::convert(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
 
     // Other address should not be allowed to change the fee
     evm.with_sender(10.into());
