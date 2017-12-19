@@ -13,66 +13,66 @@ lazy_static! {
     pub static ref KWEI: U256 = U256::from(10).pow(3.into());
 }
 
-pub fn from_tether<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *TETHER
+pub fn from_tether<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *TETHER
 }
 
-pub fn from_gether<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *GETHER
+pub fn from_gether<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *GETHER
 }
 
-pub fn from_mether<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *METHER
+pub fn from_mether<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *METHER
 }
 
-pub fn from_einstein<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *KETHER
+pub fn from_einstein<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *KETHER
 }
 
-pub fn from_grand<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *KETHER
+pub fn from_grand<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *KETHER
 }
 
-pub fn from_kether<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *KETHER
+pub fn from_kether<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *KETHER
 }
 
-pub fn from_ether<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *ETHER
+pub fn from_ether<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *ETHER
 }
 
-pub fn from_finney<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *FINNEY
+pub fn from_finney<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *FINNEY
 }
 
-pub fn from_szabo<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *SZABO
+pub fn from_szabo<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *SZABO
 }
 
-pub fn from_gwei<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *GWEI
+pub fn from_gwei<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *GWEI
 }
 
-pub fn from_shannon<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *GWEI
+pub fn from_shannon<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *GWEI
 }
 
-pub fn from_mwei<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *MWEI
+pub fn from_mwei<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *MWEI
 }
 
-pub fn from_babbage<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *MWEI
+pub fn from_babbage<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *MWEI
 }
 
-pub fn from_kwei<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *KWEI
+pub fn from_kwei<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *KWEI
 }
 
-pub fn from_ada<T: Into<U256>>(v: T) -> U256 {
-    v.into() * *KWEI
+pub fn from_ada<T: Into<U256>>(value: T) -> U256 {
+    value.into() * *KWEI
 }
 
-pub fn from_wei<T: Into<U256>>(v: T) -> U256 {
-    v.into()
+pub fn from_wei<T: Into<U256>>(value: T) -> U256 {
+    value.into()
 }
