@@ -15,66 +15,83 @@ lazy_static! {
     pub static ref KWEI: U256 = U256::from(10).pow(3.into());
 }
 
+/// returns `value` converted from ether to wei
 pub fn from_tether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *TETHER
 }
 
+/// returns `value` converted from gether to wei
 pub fn from_gether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *GETHER
 }
 
+/// returns `value` converted from mether to wei
 pub fn from_mether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *METHER
 }
 
+/// returns `value` converted from kether/grand/einstein to wei
 pub fn from_einstein<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KETHER
 }
 
+/// returns `value` converted from kether/grand/einstein to wei
 pub fn from_grand<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KETHER
 }
 
+/// returns `value` converted from kether/grand/einstein to wei
 pub fn from_kether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KETHER
 }
 
+/// returns `value` converted from ether to wei
 pub fn from_ether<T: Into<U256>>(value: T) -> U256 {
     value.into() * *ETHER
 }
 
+/// returns `value` converted from finney to wei
 pub fn from_finney<T: Into<U256>>(value: T) -> U256 {
     value.into() * *FINNEY
 }
 
+/// returns `value` converted from szabo to wei
 pub fn from_szabo<T: Into<U256>>(value: T) -> U256 {
     value.into() * *SZABO
 }
 
+/// returns `value` converted from gwei/shannon to wei
 pub fn from_gwei<T: Into<U256>>(value: T) -> U256 {
     value.into() * *GWEI
 }
 
+/// returns `value` converted from gwei/shannon to wei
 pub fn from_shannon<T: Into<U256>>(value: T) -> U256 {
     value.into() * *GWEI
 }
 
+/// returns `value` converted from mwei/babbage to wei
 pub fn from_mwei<T: Into<U256>>(value: T) -> U256 {
     value.into() * *MWEI
 }
 
+/// returns `value` converted from mwei/babbage to wei
 pub fn from_babbage<T: Into<U256>>(value: T) -> U256 {
     value.into() * *MWEI
 }
 
+/// returns `value` converted from kwei/ada to wei
 pub fn from_kwei<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KWEI
 }
 
+/// returns `value` converted from kwei/ada to wei
 pub fn from_ada<T: Into<U256>>(value: T) -> U256 {
     value.into() * *KWEI
 }
 
+/// returns `value` converted from wei to wei.
+/// unit function
 pub fn from_wei<T: Into<U256>>(value: T) -> U256 {
     value.into()
 }
