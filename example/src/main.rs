@@ -33,19 +33,22 @@ use solaris::wei;
 #[cfg(test)]
 use solaris::convert;
 
+#[cfg(test)]
+use solaris::{U256, Address};
+
 #[test]
 fn badge_reg_test_fee() {
     let (mut evm, contract) = setup();
     let reg = contract.functions();
 
     // Initial fee is 1 ETH
-    assert_eq!(convert::u256_from_bytes32(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
+    assert_eq!(U256::from(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
 
     // The owner should be able to set the fee
     reg.set_fee().transact(wei::from_gwei(10), &mut evm).unwrap();
 
     // Fee should be updated
-    assert_eq!(convert::u256_from_bytes32(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
+    assert_eq!(U256::from(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
 
     // Other address should not be allowed to change the fee
     evm.with_sender(10.into());
@@ -59,7 +62,7 @@ fn anyone_should_be_able_to_register_a_badge() {
 
     evm.run(move |mut evm| {
         // Register new entry
-        reg.register().transact(convert::address(10), convert::bytes32("test"),
+        reg.register().transact(Address::from(10), convert::bytes32("test"),
         evm
         .with_value(wei::from_ether(2))
         .with_sender(5.into())
@@ -81,8 +84,12 @@ fn anyone_should_be_able_to_register_a_badge() {
         // Test that it was registered correctly
         assert_eq!(
             reg.from_name().call(convert::bytes32("test"), &mut evm)?,
-            (convert::raw::u64_to_be_bytes32(0), convert::raw::address(10), convert::raw::address(5), )
-            );
+            (
+                U256::from(0).into(),
+                Address::from(10).into(),
+                Address::from(5).into()
+            )
+        );
 
         Ok(())
     })
