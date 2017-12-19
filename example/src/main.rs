@@ -29,7 +29,7 @@ fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {
 #[cfg(test)]
 use rustc_hex::FromHex;
 #[cfg(test)]
-use solaris::unit;
+use solaris::wei;
 #[cfg(test)]
 use solaris::sol;
 
@@ -39,17 +39,17 @@ fn badge_reg_test_fee() {
     let reg = contract.functions();
 
     // Initial fee is 1 ETH
-    assert_eq!(unit::convert(reg.fee().call(&mut evm).unwrap()), unit::ether(1));
+    assert_eq!(wei::convert(reg.fee().call(&mut evm).unwrap()), wei::ether(1));
 
     // The owner should be able to set the fee
-    reg.set_fee().transact(unit::gwei(10), &mut evm).unwrap();
+    reg.set_fee().transact(wei::gwei(10), &mut evm).unwrap();
 
     // Fee should be updated
-    assert_eq!(unit::convert(reg.fee().call(&mut evm).unwrap()), unit::gwei(10));
+    assert_eq!(wei::convert(reg.fee().call(&mut evm).unwrap()), wei::gwei(10));
 
     // Other address should not be allowed to change the fee
     evm.with_sender(10.into());
-    reg.set_fee().transact(unit::gwei(10), &mut evm).unwrap_err();
+    reg.set_fee().transact(wei::gwei(10), &mut evm).unwrap_err();
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn anyone_should_be_able_to_register_a_badge() {
         // Register new entry
         reg.register().transact(sol::address(10), sol::bytes32("test"),
         evm
-        .with_value(unit::ether(2))
+        .with_value(wei::ether(2))
         .with_sender(5.into())
         .ensure_funds()
         )?;
