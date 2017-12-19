@@ -3,7 +3,7 @@ mod platform {
 	use std::process::Command;
 
 	pub fn solc() -> Command {
-        Command::new("solcjs")
+        Command::new("solc")
 	}
 }
 
@@ -27,8 +27,15 @@ use std::path::Path;
 pub fn compile<T: AsRef<Path>>(path: T) {
     let mut command = platform::solc();
     command
+        // Output contract binary
 		.arg("--bin")
+        // Output contract abi
 		.arg("--abi")
+        // Overwrite existing output files (*.abi, *.bin, etc.)
+		.arg("--overwrite")
+        // Output to current working directory
+        .arg("-o .")
+        // Compile optimized evm-bytecode
         .arg("--optimize");
 
     for file in sol_files(&path).expect("Contracts directory is not readable.") {
