@@ -11,10 +11,6 @@ pub fn bytes32(s: &str) -> [u8; 32] {
     ret
 }
 
-pub fn u256_from_bytes32(v: [u8; 32]) -> types::U256 {
-    v.into()
-}
-
 pub(crate) fn convert_u256(x: types::U256) -> bigint::uint::U256 {
     let mut bytes = [0; 32];
     x.to_big_endian(&mut bytes);
