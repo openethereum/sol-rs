@@ -4,12 +4,6 @@ use bigint;
 // TODO [ToDr] Throw away module after
 // ethabi uses proper types.
 pub mod raw {
-    pub fn address(num: u64) -> [u8; 20] {
-        let mut bytes = [0u8; 20];
-        bytes.copy_from_slice(&*super::address(num));
-        bytes
-    }
-
     pub fn bytes32(s: &str) -> [u8; 32] {
         super::bytes32(s)
     }
