@@ -12,7 +12,7 @@ extern crate lazy_static;
 mod trace;
 
 pub mod evm;
-pub mod sol;
+pub mod convert;
 pub mod wei;
 
 lazy_static! {

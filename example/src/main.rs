@@ -31,7 +31,7 @@ use rustc_hex::FromHex;
 #[cfg(test)]
 use solaris::wei;
 #[cfg(test)]
-use solaris::sol;
+use solaris::convert;
 
 #[test]
 fn badge_reg_test_fee() {
@@ -39,13 +39,13 @@ fn badge_reg_test_fee() {
     let reg = contract.functions();
 
     // Initial fee is 1 ETH
-    assert_eq!(sol::u256_from_bytes32(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
+    assert_eq!(convert::u256_from_bytes32(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
 
     // The owner should be able to set the fee
     reg.set_fee().transact(wei::from_gwei(10), &mut evm).unwrap();
 
     // Fee should be updated
-    assert_eq!(sol::u256_from_bytes32(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
+    assert_eq!(convert::u256_from_bytes32(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
 
     // Other address should not be allowed to change the fee
     evm.with_sender(10.into());
@@ -59,7 +59,7 @@ fn anyone_should_be_able_to_register_a_badge() {
 
     evm.run(move |mut evm| {
         // Register new entry
-        reg.register().transact(sol::address(10), sol::bytes32("test"),
+        reg.register().transact(convert::address(10), convert::bytes32("test"),
         evm
         .with_value(wei::from_ether(2))
         .with_sender(5.into())
@@ -70,7 +70,7 @@ fn anyone_should_be_able_to_register_a_badge() {
         // Check that the event has been fired.
         assert_eq!(
             evm.logs(badgereg::events::Registered::default().create_filter(
-                    sol::bytes32("test"),
+                    convert::bytes32("test"),
                     ethabi::Topic::Any,
                     )).len(),
                     1
@@ -80,8 +80,8 @@ fn anyone_should_be_able_to_register_a_badge() {
         evm.with_value(0.into());
         // Test that it was registered correctly
         assert_eq!(
-            reg.from_name().call(sol::bytes32("test"), &mut evm)?,
-            (sol::raw::uint(0), sol::raw::address(10), sol::raw::address(5), )
+            reg.from_name().call(convert::bytes32("test"), &mut evm)?,
+            (convert::raw::uint(0), convert::raw::address(10), convert::raw::address(5), )
             );
 
         Ok(())
