@@ -231,12 +231,18 @@ impl<'a> ethabi::Caller for &'a mut Evm {
     }
 }
 
+// TODO [snd] hopefully one day the `vm` crate in the parity repo
+// will use the `primitives` crate and we won't have to convert
+// between those functionally identical types
 fn convert_u256(x: U256) -> bigint::uint::U256 {
     let mut bytes = [0; 32];
     x.to_big_endian(&mut bytes);
     bytes.into()
 }
 
+// TODO [snd] hopefully one day the `vm` crate in the parity repo
+// will use the `primitives` crate and we won't have to convert
+// between those functionally identical types
 fn convert_address(x: Address) -> bigint::hash::H160 {
     (&*x).into()
 }
