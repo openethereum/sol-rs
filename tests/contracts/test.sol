@@ -3,3 +3,9 @@ contract GetSenderTest {
         return msg.sender;
     }
 }
+
+contract GetValueTest {
+    function getValue() public returns(uint) {
+        return msg.value;
+    }
+}
