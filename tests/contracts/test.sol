@@ -5,7 +5,7 @@ contract GetSenderTest {
 }
 
 contract GetValueTest {
-    function getValue() public returns(uint) {
+    function getValue() payable public returns(uint) {
         return msg.value;
     }
 }

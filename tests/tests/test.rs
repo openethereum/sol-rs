@@ -36,7 +36,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 		.with_sender(input.clone())
 		.call(fns.get_sender().input())
 		.unwrap()
-		.as_slice()
+		.as_slice()[12..]
 		.into();
 
 	assert_eq!(output, input);
@@ -45,7 +45,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 		.with_sender(input.clone())
 		.transact(fns.get_sender().input())
 		.unwrap()
-		.as_slice()
+		.as_slice()[12..]
 		.into();
 
 	assert_eq!(output, input);
