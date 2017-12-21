@@ -33,8 +33,6 @@ pub fn compile<T: AsRef<Path>>(path: T) {
 		.arg("--abi")
         // Overwrite existing output files (*.abi, *.bin, etc.)
 		.arg("--overwrite")
-        // Output to current working directory
-        .arg("-o .")
         // Compile optimized evm-bytecode
         .arg("--optimize");
 
