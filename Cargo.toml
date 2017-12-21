@@ -3,4 +3,5 @@ members = [
   "example",
   "solaris",
   "solc",
+  "tests",
 ]
