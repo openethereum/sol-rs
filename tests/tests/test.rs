@@ -30,7 +30,7 @@ fn msg_sender_should_be_correct() {
 
 	let fns = contract.functions();
 
-    let sender_input: Address = 5.into();
+	let sender_input: Address = 5.into();
 
 	let sender_output: Address = evm
 		.with_sender(sender_input.clone())
