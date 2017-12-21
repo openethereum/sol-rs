@@ -40,4 +40,13 @@ fn msg_sender_should_be_correct() {
 		.into();
 
 	assert_eq!(sender_output, sender_input);
+
+	let sender_output: Address = evm
+		.with_sender(sender_input.clone())
+		.transact(fns.get_sender().input())
+		.unwrap()
+		.as_slice()
+		.into();
+
+	assert_eq!(sender_output, sender_input);
 }
