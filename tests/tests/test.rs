@@ -14,7 +14,7 @@ use types::{Address};
 use_contract!(get_sender_test, "GetSenderTest", "contracts/test_sol_GetSenderTest.abi");
 
 #[test]
-fn msg_sender_should_be_correct() {
+fn msg_sender_should_match_value_passed_into_with_sender() {
 	let contract = get_sender_test::GetSenderTest::default();
 	let code_hex = include_str!("../contracts/test_sol_GetSenderTest.bin");
 	let code_bytes = code_hex.from_hex().unwrap();
@@ -30,23 +30,23 @@ fn msg_sender_should_be_correct() {
 
 	let fns = contract.functions();
 
-	let sender_input: Address = 5.into();
+	let input: Address = 5.into();
 
-	let sender_output: Address = evm
-		.with_sender(sender_input.clone())
+	let output: Address = evm
+		.with_sender(input.clone())
 		.call(fns.get_sender().input())
 		.unwrap()
 		.as_slice()
 		.into();
 
-	assert_eq!(sender_output, sender_input);
+	assert_eq!(output, input);
 
-	let sender_output: Address = evm
-		.with_sender(sender_input.clone())
+	let output: Address = evm
+		.with_sender(input.clone())
 		.transact(fns.get_sender().input())
 		.unwrap()
 		.as_slice()
 		.into();
 
-	assert_eq!(sender_output, sender_input);
+	assert_eq!(output, input);
 }
