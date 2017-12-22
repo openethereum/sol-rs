@@ -3,7 +3,7 @@ mod platform {
 	use std::process::Command;
 
 	pub fn solc() -> Command {
-        Command::new("solc")
+        Command::new("solcjs")
 	}
 }
 
