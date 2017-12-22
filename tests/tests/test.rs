@@ -40,8 +40,8 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 		// if the return type is an address ethabi currently returns a 32 byte
 		// vector with the address in the last 20 bytes.
 		// naively converting it into an Address takes the first 20 bytes
-		// which results in an address different from the one returned by the contract.
-		// modify ethabi so it returns an Address if that's the return type.
+		// which results in a different address from the one returned by the contract.
+		// modify ethabi so it returns an Address if that's the return type
 		// and the following 2 unintuitive lines can be removed.
 		.as_slice()[12..]
 		.into();
