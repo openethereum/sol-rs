@@ -103,7 +103,9 @@ impl Evm {
         let transaction = transaction::Transaction {
             nonce,
             gas_price: 0.into(),
-            gas: 21_000.into(),
+            // supplying a bit more than 21k if people use builtin addresses as destinations.
+            // builtins have different pricing schemes.
+            gas: 22_000.into(),
             action: transaction::Action::Call(convert_address(self.sender)),
             value: convert_u256(self.value),
             data: vec![],
