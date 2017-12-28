@@ -69,7 +69,6 @@ fn anyone_should_be_able_to_register_a_badge() {
 		.ensure_funds()
 		)?;
 
-		// TODO [ToDr] The API here is crap, we need to work on sth better.
 		// Check that the event has been fired.
 		assert_eq!(
 			evm.logs(badgereg::events::Registered::default()).len(),
