@@ -63,6 +63,7 @@ fn badge_reg_test_fee() {
 
 #[test]
 fn anyone_should_be_able_to_register_a_badge() {
+<<<<<<< HEAD
     let (mut evm, contract) = setup();
 
     evm.with_value(wei::from_ether(2))
@@ -75,10 +76,11 @@ fn anyone_should_be_able_to_register_a_badge() {
         )
         .unwrap();
 
-    assert_eq!(
-        evm.logs(badgereg::events::Registered::default()).len(),
-        1
-    );
+    let registered_logs = evm.logs(badgereg::events::Registered::default());
+
+    // Check that the event has been fired.
+    assert_eq!(registered_logs.len(), 1);
+    assert_eq!(registered_logs[0].name, convert::bytes32("test"));
 
     // TODO [ToDr] Perhaps `with_` should not be persistent?
     let output = evm.with_value(0.into())
