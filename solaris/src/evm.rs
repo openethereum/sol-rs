@@ -125,6 +125,11 @@ impl Evm {
             .collect()
     }
 
+    /// returns a vector of all raw logs collected until now
+    pub fn raw_logs(&self) -> Vec<ethabi::RawLog> {
+        self.logs.iter().map(log_entry_to_raw_log).collect()
+    }
+
     /// Run the EVM and panic on all errors.
     pub fn run<F>(self, func: F) where
         F: FnOnce(Self) -> ::ethabi::Result<()>,
