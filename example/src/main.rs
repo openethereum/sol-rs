@@ -69,11 +69,11 @@ fn anyone_should_be_able_to_register_a_badge() {
 		.ensure_funds()
 		)?;
 
+		let registered_logs = evm.logs(badgereg::events::Registered::default());
+
 		// Check that the event has been fired.
-		assert_eq!(
-			evm.logs(badgereg::events::Registered::default()).len(),
-			1
-		);
+		assert_eq!(registered_logs.len(), 1);
+		assert_eq!(registered_logs[0].name, convert::bytes32("test"));
 
 		// TODO [ToDr] Perhaps `with_` should not be persistent?
 		evm.with_value(0.into());
