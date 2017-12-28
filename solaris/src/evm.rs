@@ -116,16 +116,13 @@ impl Evm {
         self
     }
 
-    pub fn logs<T: Into<Option<ethabi::TopicFilter>>>(
-        &self, maybe_filter: T
-    ) -> Vec<ethabi::RawLog> {
-        let iter = self.logs.iter().map(log_entry_to_raw_log);
-        match maybe_filter.into() {
-            None => iter.collect(),
-            Some(ref filter) => {
-                iter.filter(|log| is_log_in_filter(filter, &log)).collect()
-            },
-        }
+    /// returns a vector of all logs that were collected for a specific `event`.
+    /// the logs are conveniently converted to the events log struct `T::Log`.
+    pub fn logs<T: ethabi::ParseLog>(&self, event: T) -> Vec<T::Log> {
+        self.logs
+            .iter()
+            .filter_map(|log| event.parse_log(log_entry_to_raw_log(log)).ok())
+            .collect()
     }
 
     /// Run the EVM and panic on all errors.
