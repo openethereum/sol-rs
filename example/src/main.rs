@@ -8,21 +8,21 @@ extern crate rustc_hex;
 extern crate solaris;
 
 fn main() {
-    solaris::main(include_bytes!("../res/BadgeReg_sol_BadgeReg.abi"));
+	solaris::main(include_bytes!("../res/BadgeReg_sol_BadgeReg.abi"));
 }
 
 use_contract!(badgereg, "BadgeReg", "res/BadgeReg_sol_BadgeReg.abi");
 
 #[cfg(test)]
 fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {
-    let contract = badgereg::BadgeReg::default();
-    let code = include_str!("../res/BadgeReg_sol_BadgeReg.bin");
-    let mut evm = solaris::evm();
+	let contract = badgereg::BadgeReg::default();
+	let code = include_str!("../res/BadgeReg_sol_BadgeReg.bin");
+	let mut evm = solaris::evm();
 
-    let owner = 3.into();
-    let _address = evm.with_sender(owner).deploy(&code.from_hex().unwrap());
+	let owner = 3.into();
+	let _address = evm.with_sender(owner).deploy(&code.from_hex().unwrap());
 
-    (evm, contract)
+	(evm, contract)
 }
 
 #[cfg(test)]
