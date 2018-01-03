@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 
 [dependencies]
-ethabi = { git = "https://github.com/tomusdrw/ethabi.git", branch = "snd-parse-log-trait" }
-ethabi-derive = { git = "https://github.com/tomusdrw/ethabi.git", branch = "snd-parse-log-trait" }
+ethabi = { git = "https://github.com/tomusdrw/ethabi.git" }
+ethabi-derive = { git = "https://github.com/tomusdrw/ethabi.git" }
 ethabi-contract = { git = "https://github.com/tomusdrw/ethabi.git"}
 solaris = { path = "../solaris", version = "0.1" }
 ethereum-types = { git = "https://github.com/paritytech/primitives.git" }
