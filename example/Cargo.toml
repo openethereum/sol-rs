@@ -13,3 +13,7 @@ rustc-hex = "1.0"
 
 [build-dependencies]
 solc = { path = "../solc", version = "0.1" }
+
+[[bin]]
+name = "auto_updater"
+path = "src/auto_updater.rs"
