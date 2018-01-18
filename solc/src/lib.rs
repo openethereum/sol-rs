@@ -27,8 +27,13 @@ use std::path::Path;
 pub fn compile<T: AsRef<Path>>(path: T) {
     let mut command = platform::solc();
     command
+        // Output contract binary
 		.arg("--bin")
+        // Output contract abi
 		.arg("--abi")
+        // Overwrite existing output files (*.abi, *.bin, etc.)
+		.arg("--overwrite")
+        // Compile optimized evm-bytecode
         .arg("--optimize");
 
     for file in sol_files(&path).expect("Contracts directory is not readable.") {
