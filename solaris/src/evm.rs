@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use bigint;
 use ethabi;
+use ethcore;
 use ethcore::client::{EvmTestClient, TransactResult};
-use ethcore::{self, transaction};
-use types::{Address, U256};
+use ethcore_transaction::{Transaction, Action, SignedTransaction};
+use ethereum_types::{U256, Address};
 use vm;
 
 use trace;
@@ -58,13 +58,13 @@ impl Evm {
 
     pub fn deploy(&mut self, code: &[u8]) -> Result<Address, String> {
         let env_info = self.env_info();
-        let nonce = self.evm.state().nonce(&convert_address(self.sender)).expect(STATE);
-        let transaction = transaction::Transaction {
+        let nonce = self.evm.state().nonce(&self.sender).expect(STATE);
+        let transaction = Transaction {
             nonce,
-            gas_price: convert_u256(self.gas_price),
-            gas: convert_u256(self.gas),
-            action: transaction::Action::Create,
-            value: convert_u256(self.value),
+            gas_price: self.gas_price,
+            gas: self.gas,
+            action: Action::Create,
+            value: self.value,
             data: code.to_vec(),
         }.fake_sign((&*self.sender).into());
 
@@ -100,14 +100,14 @@ impl Evm {
         let env_info = self.env_info();
         let sender = "7c532DB9E0c06C26fd40Acc56AC55C1eE92D3C3A".parse().unwrap();
         let nonce = self.evm.state().nonce(&sender).expect(STATE);
-        let transaction = transaction::Transaction {
+        let transaction = Transaction {
             nonce,
             gas_price: 0.into(),
             // supplying a bit more than 21k if people use builtin addresses as destinations.
             // builtins have different pricing schemes.
             gas: 22_000.into(),
-            action: transaction::Action::Call(convert_address(self.sender)),
-            value: convert_u256(self.value),
+            action: Action::Call(self.sender),
+            value: self.value,
             data: vec![],
         }.fake_sign(sender);
 
@@ -131,7 +131,7 @@ impl Evm {
     fn evm_transact<O, F>(
         &mut self,
         env_info: &vm::EnvInfo,
-        transaction: transaction::SignedTransaction,
+        transaction: SignedTransaction,
         with_tracing: bool,
         result: F,
     ) -> Result<O, String> where
@@ -189,17 +189,17 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let mut params = vm::ActionParams::default();
-        params.sender = convert_address(self.sender);
-        params.origin = convert_address(self.sender);
-        params.address = convert_address(contract_address);
-        params.code_address = convert_address(contract_address);
+        params.sender = self.sender;
+        params.origin = self.sender;
+        params.address = contract_address;
+        params.code_address = contract_address;
         params.code = self.evm.state()
-            .code(&convert_address(contract_address)).expect(STATE);
+            .code(&contract_address).expect(STATE);
         params.data = Some((&*bytes).into());
         params.call_type = vm::CallType::Call;
-        params.value = vm::ActionValue::Transfer(convert_u256(self.value));
-        params.gas = convert_u256(self.gas);
-        params.gas_price = convert_u256(self.gas_price);
+        params.value = vm::ActionValue::Transfer(self.value);
+        params.gas = self.gas;
+        params.gas_price = self.gas_price;
 
         let mut tracers = self.tracers();
         let result = self.evm.call(params, &mut tracers.0, &mut tracers.1);
@@ -219,32 +219,16 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let env_info = self.env_info();
-        let nonce = self.evm.state().nonce(&convert_address(self.sender)).expect(STATE);
-        let transaction = transaction::Transaction {
+        let nonce = self.evm.state().nonce(&self.sender).expect(STATE);
+        let transaction = Transaction {
             nonce,
-            gas_price: convert_u256(self.gas_price),
-            gas: convert_u256(self.gas),
-            action: transaction::Action::Call(convert_address(contract_address)),
-            value: convert_u256(self.value),
+            gas_price: self.gas_price,
+            gas: self.gas,
+            action: Action::Call(contract_address),
+            value: self.value,
             data: bytes.to_vec(),
-        }.fake_sign(convert_address(self.sender));
+        }.fake_sign(self.sender);
 
         self.evm_transact(&env_info, transaction, true, |_, output, _| Ok(output))
     }
-}
-
-// TODO [snd] hopefully one day the `vm` crate in the parity repo
-// will use the `primitives` crate and we won't have to convert
-// between those functionally identical types
-fn convert_u256(x: U256) -> bigint::uint::U256 {
-    let mut bytes = [0; 32];
-    x.to_big_endian(&mut bytes);
-    bytes.into()
-}
-
-// TODO [snd] hopefully one day the `vm` crate in the parity repo
-// will use the `primitives` crate and we won't have to convert
-// between those functionally identical types
-fn convert_address(x: Address) -> bigint::hash::H160 {
-    (&*x).into()
 }

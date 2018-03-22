@@ -1,6 +1,6 @@
 /// conversion of the various ether units (shannon, gwei, ...) to wei
 
-use types::U256;
+use ethereum_types::U256;
 
 lazy_static! {
     pub static ref TETHER: U256 = U256::from(10).pow(30.into());

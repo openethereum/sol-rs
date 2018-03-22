@@ -1,5 +1,4 @@
-use bigint::hash::H160;
-use bigint::prelude::U256;
+use ethereum_types::{H160, U256};
 use ethcore::trace::trace::{Call, Create};
 use ethcore::trace;
 use ethcore_bytes::{Bytes, ToPretty};
@@ -136,7 +135,7 @@ impl trace::Tracer for PrintingTracer {
 impl trace::VMTracer for PrintingTracer {
     type Output = ();
 
-    fn trace_next_instruction(&mut self, pc: usize, instruction: u8) -> bool {
+    fn trace_next_instruction(&mut self, pc: usize, instruction: u8, current_gas: U256) -> bool {
         self.pc = pc;
         self.instruction = instruction;
         true
