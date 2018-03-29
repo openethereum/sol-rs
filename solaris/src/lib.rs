@@ -1,7 +1,7 @@
 extern crate ethabi;
 extern crate ethcore;
-extern crate ethcore_transaction;
 extern crate ethcore_bytes;
+extern crate ethcore_transaction;
 extern crate ethereum_types;
 extern crate evm as ethcore_evm;
 extern crate vm;
@@ -11,7 +11,7 @@ extern crate lazy_static;
 
 /// re-export these for now since they provide useful conversion from
 /// integer primitives and to byte arrays (which are required by the ethabi for now)
-pub use ethereum_types::{U256, Address};
+pub use ethereum_types::{Address, U256};
 
 mod trace;
 
