@@ -283,7 +283,7 @@ version = "6.0.0"
 source = "git+https://github.com/paritytech/ethabi.git?branch=tomusdrw-master#df87d04d5c76b5fed9194c2ae0a7bba1a3928257"
 dependencies = [
  "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "ethereum-types 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ethereum-types 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-hex 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -356,18 +356,6 @@ dependencies = [
  "crunchy 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "ethereum-types-serialize 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "fixed-hash 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
- "tiny-keccak 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "ethbloom"
-version = "0.5.0"
-source = "git+https://github.com/paritytech/primitives.git#8820f960ab0f8abf6b987e9f6cbf5d1b162abc58"
-dependencies = [
- "crunchy 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "ethereum-types-serialize 0.2.1 (git+https://github.com/paritytech/primitives.git)",
- "fixed-hash 0.2.0 (git+https://github.com/paritytech/primitives.git)",
  "serde 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "tiny-keccak 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -553,18 +541,6 @@ dependencies = [
 
 [[package]]
 name = "ethereum-types"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "crunchy 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "ethbloom 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "fixed-hash 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc_version 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "uint 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "ethereum-types"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
@@ -575,28 +551,6 @@ dependencies = [
  "rustc_version 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "uint 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "ethereum-types"
-version = "0.3.0"
-source = "git+https://github.com/paritytech/primitives.git#8820f960ab0f8abf6b987e9f6cbf5d1b162abc58"
-dependencies = [
- "crunchy 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "ethbloom 0.5.0 (git+https://github.com/paritytech/primitives.git)",
- "ethereum-types-serialize 0.2.1 (git+https://github.com/paritytech/primitives.git)",
- "fixed-hash 0.2.0 (git+https://github.com/paritytech/primitives.git)",
- "rustc_version 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
- "uint 0.2.0 (git+https://github.com/paritytech/primitives.git)",
-]
-
-[[package]]
-name = "ethereum-types-serialize"
-version = "0.2.1"
-source = "git+https://github.com/paritytech/primitives.git#8820f960ab0f8abf6b987e9f6cbf5d1b162abc58"
-dependencies = [
- "serde 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -698,17 +652,6 @@ dependencies = [
 name = "fixed-hash"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "heapsize 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc-hex 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "fixed-hash"
-version = "0.2.0"
-source = "git+https://github.com/paritytech/primitives.git#8820f960ab0f8abf6b987e9f6cbf5d1b162abc58"
 dependencies = [
  "heapsize 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1930,7 +1873,7 @@ dependencies = [
  "ethabi 6.0.0 (git+https://github.com/paritytech/ethabi.git?branch=tomusdrw-master)",
  "ethabi-contract 6.0.0 (git+https://github.com/paritytech/ethabi.git?branch=tomusdrw-master)",
  "ethabi-derive 6.0.0 (git+https://github.com/paritytech/ethabi.git?branch=tomusdrw-master)",
- "ethereum-types 0.3.0 (git+https://github.com/paritytech/primitives.git)",
+ "ethereum-types 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-hex 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "solaris 0.1.0",
  "solc 0.1.0",
@@ -2167,17 +2110,6 @@ dependencies = [
 name = "uint"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "byteorder 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "heapsize 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc-hex 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc_version 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "uint"
-version = "0.2.0"
-source = "git+https://github.com/paritytech/primitives.git#8820f960ab0f8abf6b987e9f6cbf5d1b162abc58"
 dependencies = [
  "byteorder 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "heapsize 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2469,7 +2401,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum ethash 1.11.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethbloom 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "dd5f7fb5d27fb017f21c15d1e0b953831b58581c9942a5e5614fd2b6603697b7"
 "checksum ethbloom 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f240172b976e2421fa5485e45cd45287bbdb56d742aa3a1d77005c49071a8518"
-"checksum ethbloom 0.5.0 (git+https://github.com/paritytech/primitives.git)" = "<none>"
 "checksum ethcore 1.11.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethcore-bloom-journal 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethcore-bytes 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
@@ -2479,10 +2410,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum ethcore-stratum 1.11.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethcore-transaction 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethcrypto 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
-"checksum ethereum-types 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "2adaa5b8ceafcce0bc3a68ef116ca5702958cc97d70a6eb008aeddb569b092b3"
 "checksum ethereum-types 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "bad6fb0e4ab648f4d8d8314c340c47f9e805b085b78be1b8da4676534cb419df"
-"checksum ethereum-types 0.3.0 (git+https://github.com/paritytech/primitives.git)" = "<none>"
-"checksum ethereum-types-serialize 0.2.1 (git+https://github.com/paritytech/primitives.git)" = "<none>"
 "checksum ethereum-types-serialize 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "4ac59a21a9ce98e188f3dace9eb67a6c4a3c67ec7fbc7218cb827852679dc002"
 "checksum ethjson 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethkey 0.3.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
@@ -2490,7 +2418,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum evm 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum fetch 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum fixed-hash 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "21c520ebc46522d519aec9cba2b7115d49cea707d771b772c46bec61aa0daeb8"
-"checksum fixed-hash 0.2.0 (git+https://github.com/paritytech/primitives.git)" = "<none>"
 "checksum fnv 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "6cc484842f1e2884faf56f529f960cc12ad8c71ce96cc7abba0a067c98fee344"
 "checksum fuchsia-zircon 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2e9763c69ebaae630ba35f74888db465e49e259ba1bc0eda7d06f4a067615d82"
 "checksum fuchsia-zircon-sys 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "3dcaa9ae7725d12cdb85b3ad99a434db70b468c09ded17e012d86b5c1010f7a7"
@@ -2653,7 +2580,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum trezor-sys 1.0.0 (git+https://github.com/paritytech/trezor-sys)" = "<none>"
 "checksum triehash 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum uint 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "53a4340c35703f926ec365c6797bb4a7a10bb6b9affe29ca385c9d804401f5e3"
-"checksum uint 0.2.0 (git+https://github.com/paritytech/primitives.git)" = "<none>"
 "checksum unexpected 0.1.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum unicase 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7f4765f83163b74f957c797ad9253caf97f103fb064d3999aea9568d09fc8a33"
 "checksum unicase 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "284b6d3db520d67fbe88fd778c21510d1b0ba4a551e5d0fbb023d33405f6de8a"
