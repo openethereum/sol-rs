@@ -1,5 +1,10 @@
 # Solaris
 
+[![Build Status][travis-image]][travis-url]
+
+[travis-image]: https://travis-ci.org/paritytech/sol-rs.svg?branch=master
+[travis-url]: https://travis-ci.org/paritytech/sol-rs
+
 Solidity Smart Contracts test harness written in Rust using the native Parity Client EVM.
 
 ## Benefits
