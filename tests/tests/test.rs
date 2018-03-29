@@ -8,8 +8,9 @@ extern crate rustc_hex;
 extern crate solaris;
 
 use rustc_hex::FromHex;
-use ethabi::Caller;
 use types::{Address, U256};
+use ethabi::DelegateCall;
+
 
 use_contract!(get_sender_test, "GetSenderTest", "contracts/test_sol_GetSenderTest.abi");
 
@@ -32,9 +33,9 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 
 	let input: Address = 5.into();
 
-	let output: Address = evm
-		.with_sender(input.clone())
-		.call(fns.get_sender().input())
+	let output: Address = fns
+		.get_sender()
+		.call(evm.with_sender(input.clone()))
 		.unwrap()
 		// TODO [snd]
 		// if the return type is an address ethabi currently returns a 32 byte
@@ -48,9 +49,9 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 
 	assert_eq!(output, input);
 
-	let output: Address = evm
-		.with_sender(input.clone())
-		.transact(fns.get_sender().input())
+	let output: Address = fns
+		.get_sender()
+		.transact(evm.with_sender(input.clone()))
 		.unwrap()
 		.as_slice()[12..]
 		.into();
@@ -79,20 +80,26 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
 	let input = solaris::wei::from_ether(1);
 
-	let output: U256 = evm
-		.with_value(input.clone())
-		.ensure_funds()
-		.call(fns.get_value().input())
+	let output: U256 = fns
+		.get_value()
+		.call(
+			evm
+				.with_value(input.clone())
+				.ensure_funds()
+		)
 		.unwrap()
 		.as_slice()
 		.into();
 
 	assert_eq!(output, input);
 
-	let output: U256 = evm
-		.with_value(input.clone())
-		.ensure_funds()
-		.transact(fns.get_value().input())
+	let output: U256 = fns
+		.get_value()
+		.transact(
+			evm
+				.with_value(input.clone())
+				.ensure_funds()
+		)
 		.unwrap()
 		.as_slice()
 		.into();
