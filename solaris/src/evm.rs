@@ -1,11 +1,14 @@
 use std::sync::Arc;
 
-use ethabi;
+use ethabi::ContractFunction;
 use ethcore;
 use ethcore::client::{EvmTestClient, TransactResult};
 use ethcore_transaction::{Action, SignedTransaction, Transaction};
-use ethereum_types::{Address, U256};
+use ethereum_types::{Address, U256, H256, H160};
 use vm;
+use error;
+use std::error::Error;
+use std::fmt;
 
 use trace;
 
