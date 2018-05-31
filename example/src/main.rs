@@ -1,12 +1,11 @@
 extern crate ethabi;
 #[macro_use]
-extern crate ethabi_derive;
-#[macro_use]
 extern crate ethabi_contract;
+#[macro_use]
+extern crate ethabi_derive;
 extern crate ethereum_types as types;
 extern crate rustc_hex;
 extern crate solaris;
-
 
 fn main() {
     solaris::main(include_bytes!("../res/BadgeReg_sol_BadgeReg.abi"));
@@ -34,7 +33,7 @@ use solaris::wei;
 use solaris::convert;
 
 #[cfg(test)]
-use solaris::{U256, Address};
+use solaris::{Address, U256};
 
 #[test]
 fn badge_reg_test_fee() {
@@ -42,17 +41,27 @@ fn badge_reg_test_fee() {
     let reg = contract.functions();
 
     // Initial fee is 1 ETH
-    assert_eq!(U256::from(reg.fee().call(&mut evm).unwrap()), wei::from_ether(1));
+    assert_eq!(
+        U256::from(reg.fee().call(&mut evm).unwrap()),
+        wei::from_ether(1)
+    );
 
     // The owner should be able to set the fee
-    reg.set_fee().transact(wei::from_gwei(10), &mut evm).unwrap();
+    reg.set_fee()
+        .transact(wei::from_gwei(10), &mut evm)
+        .unwrap();
 
     // Fee should be updated
-    assert_eq!(U256::from(reg.fee().call(&mut evm).unwrap()), wei::from_gwei(10));
+    assert_eq!(
+        U256::from(reg.fee().call(&mut evm).unwrap()),
+        wei::from_gwei(10)
+    );
 
     // Other address should not be allowed to change the fee
     evm.with_sender(10.into());
-    reg.set_fee().transact(wei::from_gwei(10), &mut evm).unwrap_err();
+    reg.set_fee()
+        .transact(wei::from_gwei(10), &mut evm)
+        .unwrap_err();
 }
 
 #[test]
@@ -62,22 +71,23 @@ fn anyone_should_be_able_to_register_a_badge() {
 
     evm.run(move |mut evm| {
         // Register new entry
-        reg.register().transact(Address::from(10), convert::bytes32("test"),
-        evm
-        .with_value(wei::from_ether(2))
-        .with_sender(5.into())
-        .ensure_funds()
+        reg.register().transact(
+            Address::from(10),
+            convert::bytes32("test"),
+            evm.with_value(wei::from_ether(2))
+                .with_sender(5.into())
+                .ensure_funds(),
         )?;
 
         // TODO [ToDr] The API here is crap, we need to work on sth better.
         // Check that the event has been fired.
         assert_eq!(
-            evm.logs(badgereg::events::Registered::default().create_filter(
-                    convert::bytes32("test"),
-                    ethabi::Topic::Any,
-                    )).len(),
-                    1
-                  );
+            evm.logs(
+                badgereg::events::Registered::default()
+                    .create_filter(convert::bytes32("test"), ethabi::Topic::Any,)
+            ).len(),
+            1
+        );
 
         // TODO [ToDr] Perhaps `with_` should not be persistent?
         evm.with_value(0.into());

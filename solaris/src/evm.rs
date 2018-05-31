@@ -3,8 +3,8 @@ use std::sync::Arc;
 use ethabi;
 use ethcore;
 use ethcore::client::{EvmTestClient, TransactResult};
-use ethcore_transaction::{Transaction, Action, SignedTransaction};
-use ethereum_types::{U256, Address};
+use ethcore_transaction::{Action, SignedTransaction, Transaction};
+use ethereum_types::{Address, U256};
 use vm;
 
 use trace;
@@ -68,10 +68,16 @@ impl Evm {
             data: code.to_vec(),
         }.fake_sign((&*self.sender).into());
 
-        self.evm_transact(&env_info, transaction, true, |s, _output, contract_address| {
-            s.contract_address = contract_address;
-            s.contract_address.ok_or_else(|| "Contract address missing.".into())
-        })
+        self.evm_transact(
+            &env_info,
+            transaction,
+            true,
+            |s, _output, contract_address| {
+                s.contract_address = contract_address;
+                s.contract_address
+                    .ok_or_else(|| "Contract address missing.".into())
+            },
+        )
     }
 
     pub fn with_gas(&mut self, gas: U256) -> &mut Self {
@@ -122,7 +128,8 @@ impl Evm {
     }
 
     /// Run the EVM and panic on all errors.
-    pub fn run<F>(self, func: F) where
+    pub fn run<F>(self, func: F)
+    where
         F: FnOnce(Self) -> ::ethabi::Result<()>,
     {
         func(self).expect("Unexpected error occured.");
@@ -134,23 +141,42 @@ impl Evm {
         transaction: SignedTransaction,
         with_tracing: bool,
         result: F,
-    ) -> Result<O, String> where
+    ) -> Result<O, String>
+    where
         F: FnOnce(&mut Self, Vec<u8>, Option<Address>) -> Result<O, String>,
     {
         let evm_result = if with_tracing {
             let tracers = self.tracers();
-            match self.evm.transact(&env_info, transaction, tracers.0, tracers.1) {
-                TransactResult::Ok { output, gas_left, logs, outcome, contract_address, .. } => {
+            match self.evm
+                .transact(&env_info, transaction, tracers.0, tracers.1)
+            {
+                TransactResult::Ok {
+                    output,
+                    gas_left,
+                    logs,
+                    outcome,
+                    contract_address,
+                    ..
+                } => {
                     self.logs.extend(logs);
                     Ok((output, gas_left, outcome, contract_address))
-                },
+                }
                 e => Err(format!("EVM Error: {:?}", e)),
             }
         } else {
-            match self.evm.transact(&env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer) {
-                TransactResult::Ok { output, gas_left, outcome, contract_address, .. } => {
-                    Ok((output, gas_left, outcome, contract_address))
-                },
+            match self.evm.transact(
+                &env_info,
+                transaction,
+                ethcore::trace::NoopTracer,
+                ethcore::trace::NoopVMTracer,
+            ) {
+                TransactResult::Ok {
+                    output,
+                    gas_left,
+                    outcome,
+                    contract_address,
+                    ..
+                } => Ok((output, gas_left, outcome, contract_address)),
                 e => Err(format!("EVM Error: {:?}", e)),
             }
         }?;
@@ -158,26 +184,25 @@ impl Evm {
         let (output, gas_left, outcome, contract_address) = evm_result;
         let contract_address = contract_address.map(|x| (&*x).into());
         match outcome {
-            ethcore::receipt::TransactionOutcome::Unknown |
-            ethcore::receipt::TransactionOutcome::StateRoot(_) => {
+            ethcore::receipt::TransactionOutcome::Unknown
+            | ethcore::receipt::TransactionOutcome::StateRoot(_) => {
                 // TODO [ToDr] Shitty detection of failed calls?
                 if gas_left > 0.into() {
                     result(self, output, contract_address)
                 } else {
                     Err(format!("Call went out of gas."))
                 }
-            },
+            }
             ethcore::receipt::TransactionOutcome::StatusCode(status) => {
                 if status == 1 {
                     result(self, output, contract_address)
                 } else {
                     Err(format!("Call failed with status code: {}", status))
                 }
-            },
+            }
         }
     }
 }
-
 
 const STATE: &str = "State failure.";
 
@@ -193,8 +218,7 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         params.origin = self.sender;
         params.address = contract_address;
         params.code_address = contract_address;
-        params.code = self.evm.state()
-            .code(&contract_address).expect(STATE);
+        params.code = self.evm.state().code(&contract_address).expect(STATE);
         params.data = Some((&*bytes).into());
         params.call_type = vm::CallType::Call;
         params.value = vm::ActionValue::Transfer(self.value);
@@ -205,13 +229,11 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         let result = self.evm.call(params, &mut tracers.0, &mut tracers.1);
 
         match result {
-            Ok(result) => {
-                Ok((&*result.return_data).into())
-            },
+            Ok(result) => Ok((&*result.return_data).into()),
             Err(err) => {
                 // TODO [ToDr] Nice errors.
                 Err(format!("Unexpected error: {:?}", err))
-            },
+            }
         }
     }
 
