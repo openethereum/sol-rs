@@ -33,74 +33,70 @@ use solaris::wei;
 use solaris::convert;
 
 #[cfg(test)]
-use types::{Address, U256};
-
-#[cfg(test)]
-use ethabi::DelegateCall;
+use types::{Address, H256, U256};
 
 #[test]
 fn badge_reg_test_fee() {
     let (mut evm, contract) = setup();
-    let reg = contract.functions();
 
     // Initial fee is 1 ETH
     assert_eq!(
-        U256::from(reg.fee().call(&mut evm).unwrap().as_slice()),
+        evm.call(contract.functions().fee()).unwrap(),
         wei::from_ether(1)
     );
 
     // The owner should be able to set the fee
-    reg.set_fee(wei::from_gwei(10)).transact(&mut evm).unwrap();
+    evm.call(contract.functions().set_fee(wei::from_gwei(10)))
+        .unwrap();
 
     // Fee should be updated
     assert_eq!(
-        U256::from(reg.fee().call(&mut evm).unwrap().as_slice()),
+        evm.call(contract.functions().fee()).unwrap(),
         wei::from_gwei(10)
     );
 
     // Other address should not be allowed to change the fee
-    evm.with_sender(10.into());
-    reg.set_fee(wei::from_gwei(10))
-        .transact(&mut evm)
-        .unwrap_err();
+    evm.with_sender(10.into())
+        .transact(contract.functions().set_fee(wei::from_gwei(10)))
+        .unwrap();
 }
 
 #[test]
 fn anyone_should_be_able_to_register_a_badge() {
-    let (evm, contract) = setup();
-    let reg = contract.functions();
+    let (mut evm, contract) = setup();
 
-    evm.run(move |mut evm| {
-        // Register new entry
-        reg.register(Address::from(10), convert::bytes32("test"))
-            .transact(
-                evm.with_value(wei::from_ether(2))
-                    .with_sender(5.into())
-                    .ensure_funds(),
-            )?;
+    evm.with_value(wei::from_ether(2))
+        .with_sender(5.into())
+        .ensure_funds()
+        .transact(
+            contract
+                .functions()
+                .register(Address::from(10), convert::bytes32("test")),
+        )
+        .unwrap();
 
-        // TODO [ToDr] The API here is crap, we need to work on sth better.
-        // Check that the event has been fired.
-        assert_eq!(
-            evm.logs(
-                badgereg::events::Registered::default()
-                    .create_filter(convert::bytes32("test"), ethabi::Topic::Any,)
-            ).len(),
-            1
-        );
+    // TODO [ToDr] The API here is crap, we need to work on sth better.
+    // Check that the event has been fired.
+    assert_eq!(
+        evm.logs(
+            badgereg::events::Registered::default()
+                .create_filter(H256::from(convert::bytes32("test")), ethabi::Topic::Any,)
+        ).len(),
+        1
+    );
 
-        // TODO [ToDr] Perhaps `with_` should not be persistent?
-        evm.with_value(0.into());
-        // Test that it was registered correctly
-        assert_eq!(
-            reg.from_name(convert::bytes32("test")).call(&mut evm)?,
-            (
-                U256::from(0).into(),
-                Address::from(10).into(),
-                Address::from(5).into()
-            )
-        );
+    // TODO [ToDr] Perhaps `with_` should not be persistent?
+    let output = evm.with_value(0.into())
+        .call(contract.functions().from_name(convert::bytes32("test")))
+        .unwrap();
 
-        Ok(())
-    })
+    // Test that it was registered correctly
+    assert_eq!(
+        output,
+        (
+            U256::from(0).into(),
+            Address::from(10).into(),
+            Address::from(5).into()
+        )
+    );
 }
