@@ -50,28 +50,6 @@ struct TransactSuccess<T, V> {
     outcome: ethcore::receipt::TransactionOutcome,
 }
 
-struct TransactionOutput {
-    state_root: H256,
-    gas_left: U256,
-    output: Vec<u8>,
-    contract_address: Option<H160>,
-    logs: Vec<ethcore::log_entry::LogEntry>,
-    outcome: ethcore::receipt::TransactionOutcome,
-}
-
-impl<T, V> From<TransactSuccess<T, V>> for TransactionOutput {
-    fn from(t: TransactSuccess<T, V>) -> Self {
-        TransactionOutput {
-            state_root: t.state_root,
-            gas_left: t.gas_left,
-            output: t.output,
-            contract_address: t.contract_address,
-            logs: t.logs,
-            outcome: t.outcome,
-        }
-    }
-}
-
 // temporary workaround for https://github.com/paritytech/parity/issues/8755
 #[derive(Debug)]
 pub struct TransactError {
@@ -118,6 +96,28 @@ fn split_transact_result<T, V>(
             outcome,
         }),
         TransactResult::Err { state_root, error } => Err(TransactError { state_root, error }),
+    }
+}
+
+struct TransactionOutput {
+    state_root: H256,
+    gas_left: U256,
+    output: Vec<u8>,
+    contract_address: Option<H160>,
+    logs: Vec<ethcore::log_entry::LogEntry>,
+    outcome: ethcore::receipt::TransactionOutcome,
+}
+
+impl<T, V> From<TransactSuccess<T, V>> for TransactionOutput {
+    fn from(t: TransactSuccess<T, V>) -> Self {
+        TransactionOutput {
+            state_root: t.state_root,
+            gas_left: t.gas_left,
+            output: t.output,
+            contract_address: t.contract_address,
+            logs: t.logs,
+            outcome: t.outcome,
+        }
     }
 }
 
