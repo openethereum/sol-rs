@@ -32,8 +32,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 
     let sender = 5.into();
 
-    let output: Address = evm
-        .with_sender(sender)
+    let output: Address = evm.with_sender(sender)
         .call(contract.functions().get_sender())
         .unwrap();
 
@@ -58,8 +57,7 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
     let value = solaris::wei::from_ether(1);
 
-    let output: U256 = evm
-        .with_value(value)
+    let output: U256 = evm.with_value(value)
         .ensure_funds()
         .call(contract.functions().get_value())
         .unwrap();
