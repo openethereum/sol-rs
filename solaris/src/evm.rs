@@ -27,6 +27,70 @@ impl Default for Evm {
     }
 }
 
+struct TransactSuccess<T, V> {
+    /// State root
+    state_root: H256,
+    /// Amount of gas left
+    gas_left: U256,
+    /// Output
+    output: Vec<u8>,
+    /// Traces
+    trace: Vec<T>,
+    /// VM Traces
+    vm_trace: Option<V>,
+    /// Created contract address (if any)
+    contract_address: Option<H160>,
+    /// Generated logs
+    logs: Vec<ethcore::log_entry::LogEntry>,
+    /// outcome
+    outcome: ethcore::receipt::TransactionOutcome,
+}
+
+#[derive(Debug)]
+pub struct TransactError {
+    /// State root
+    state_root: H256,
+    /// Execution error
+    error: ethcore::error::Error,
+}
+
+impl Error for TransactError {
+    fn description(&self) -> &str {
+        "error transacting with the test evm"
+    }
+}
+
+impl fmt::Display for TransactError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+fn split_transact_result<T, V>(result: TransactResult<T, V>) -> Result<TransactSuccess<T, V>, TransactError> {
+    match result {
+        TransactResult::Ok {
+            state_root,
+            gas_left,
+            output,
+            trace,
+            vm_trace,
+            contract_address,
+            logs,
+            outcome,
+        } => Ok(TransactSuccess {
+            state_root,
+            gas_left,
+            output,
+            trace,
+            vm_trace,
+            contract_address,
+            logs,
+            outcome,
+        }),
+        TransactResult::Err { state_root, error } => Err(TransactError { state_root, error }),
+    }
+}
+
 impl Evm {
     pub fn new_current() -> Self {
         let evm = EvmTestClient::new(&*::FOUNDATION).expect("Valid spec given; qed");
