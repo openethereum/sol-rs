@@ -208,8 +208,7 @@ impl Evm {
             data: vec![],
         }.fake_sign(sender);
 
-        self.evm_transact(&env_info, transaction, false, |_, _, _| Ok(()))
-            .expect("Unable to top up account.");
+        self.raw_transact(&env_info, transaction).expect("Unable to top up account.");
         self
     }
 
