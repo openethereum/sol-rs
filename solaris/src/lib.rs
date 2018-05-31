@@ -21,6 +21,7 @@ mod trace;
 pub mod evm;
 pub mod convert;
 pub mod wei;
+pub mod error;
 
 lazy_static! {
     pub static ref FOUNDATION: ethcore::spec::Spec = ethcore::ethereum::new_foundation(&::std::env::temp_dir());
