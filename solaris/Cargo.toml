@@ -8,7 +8,7 @@ ethabi = { git = "https://github.com/paritytech/ethabi.git" }
 ethcore = { git = "https://github.com/paritytech/parity.git" }
 ethcore-transaction = { git = "https://github.com/paritytech/parity.git" }
 ethcore-bytes = { git = "https://github.com/paritytech/parity.git" }
-ethereum-types = "0.2.2"
+ethereum-types = "0.3"
 evm = { git = "https://github.com/paritytech/parity.git" }
 lazy_static = "0.2"
 vm = { git = "https://github.com/paritytech/parity.git" }
