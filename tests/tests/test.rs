@@ -18,28 +18,26 @@ use_contract!(
 
 #[test]
 fn msg_sender_should_match_value_passed_into_with_sender() {
-    let contract = get_sender_test::GetSenderTest::default();
-    let code_hex = include_str!("../contracts/GetSenderTest.bin");
-    let code_bytes = code_hex.from_hex().unwrap();
-
     let mut evm = solaris::evm();
 
     let contract_owner_address: Address = 3.into();
 
+    let code_hex = include_str!("../contracts/GetSenderTest.bin");
+    let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
         .expect("contract deployment should succeed");
 
-    let fns = contract.functions();
+    let contract = get_sender_test::GetSenderTest::default();
 
-    let input: Address = 5.into();
+    let sender = 5.into();
 
     let output: Address = evm
-        .with_sender(input.clone())
-        .call(fns.get_sender())
+        .with_sender(sender)
+        .call(contract.functions().get_sender())
         .unwrap();
 
-    assert_eq!(output, input);
+    assert_eq!(output, sender);
 }
 
 use_contract!(
@@ -50,26 +48,24 @@ use_contract!(
 
 #[test]
 fn msg_value_should_match_value_passed_into_with_value() {
-    let contract = get_value_test::GetValueTest::default();
-    let code_hex = include_str!("../contracts/GetValueTest.bin");
-    let code_bytes = code_hex.from_hex().unwrap();
-
     let mut evm = solaris::evm();
 
     let contract_owner_address: Address = 3.into();
 
+    let code_hex = include_str!("../contracts/GetValueTest.bin");
+    let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
         .expect("contract deployment should succeed");
 
-    let fns = contract.functions();
+    let contract = get_value_test::GetValueTest::default();
 
     let value = solaris::wei::from_ether(1);
 
     let output: U256 = evm
-        .with_value(value.clone())
+        .with_value(value)
         .ensure_funds()
-        .call(fns.get_value())
+        .call(contract.functions().get_value())
         .unwrap();
 
     assert_eq!(output, value);
