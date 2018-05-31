@@ -46,6 +46,28 @@ struct TransactSuccess<T, V> {
     outcome: ethcore::receipt::TransactionOutcome,
 }
 
+struct TransactionOutput {
+    state_root: H256,
+    gas_left: U256,
+    output: Vec<u8>,
+    contract_address: Option<H160>,
+    logs: Vec<ethcore::log_entry::LogEntry>,
+    outcome: ethcore::receipt::TransactionOutcome,
+}
+
+impl<T, V> From<TransactSuccess<T, V>> for TransactionOutput {
+    fn from(t: TransactSuccess<T, V>) -> Self {
+        TransactionOutput {
+            state_root: t.state_root,
+            gas_left: t.gas_left,
+            output: t.output,
+            contract_address: t.contract_address,
+            logs: t.logs,
+            outcome: t.outcome,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct TransactError {
     /// State root
