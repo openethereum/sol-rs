@@ -24,7 +24,8 @@ pub mod wei;
 pub mod error;
 
 lazy_static! {
-    pub static ref FOUNDATION: ethcore::spec::Spec = ethcore::ethereum::new_foundation(&::std::env::temp_dir());
+    pub static ref FOUNDATION: ethcore::spec::Spec =
+        ethcore::ethereum::new_foundation(&::std::env::temp_dir());
 }
 
 pub fn main(_json_bytes: &[u8]) {

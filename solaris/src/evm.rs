@@ -4,7 +4,7 @@ use ethabi::ContractFunction;
 use ethcore;
 use ethcore::client::{EvmTestClient, TransactResult};
 use ethcore_transaction::{Action, SignedTransaction, Transaction};
-use ethereum_types::{Address, U256, H256, H160};
+use ethereum_types::{Address, H160, H256, U256};
 use vm;
 use error;
 use std::error::Error;
@@ -91,7 +91,9 @@ impl fmt::Display for TransactError {
     }
 }
 
-fn split_transact_result<T, V>(result: TransactResult<T, V>) -> Result<TransactSuccess<T, V>, TransactError> {
+fn split_transact_result<T, V>(
+    result: TransactResult<T, V>,
+) -> Result<TransactSuccess<T, V>, TransactError> {
     match result {
         TransactResult::Ok {
             state_root,
@@ -161,7 +163,8 @@ impl Evm {
 
         let transaction_output = self.raw_transact(&env_info, transaction)?;
 
-        let contract_address = transaction_output.contract_address
+        let contract_address = transaction_output
+            .contract_address
             .expect("transaction output must have contract_address after deploy");
 
         self.contract_address = Some(contract_address);
@@ -211,7 +214,8 @@ impl Evm {
             data: vec![],
         }.fake_sign(sender);
 
-        self.raw_transact(&env_info, transaction).expect("Unable to top up account.");
+        self.raw_transact(&env_info, transaction)
+            .expect("Unable to top up account.");
         self
     }
 
@@ -247,20 +251,39 @@ impl Evm {
             let mut tracers = self.tracers();
             self.evm.call(params, &mut tracers.0, &mut tracers.1)?
         } else {
-            self.evm.call(params, &mut ethcore::trace::NoopTracer, &mut ethcore::trace::NoopVMTracer)?
+            self.evm.call(
+                params,
+                &mut ethcore::trace::NoopTracer,
+                &mut ethcore::trace::NoopVMTracer,
+            )?
         };
 
-        let output = f.output(result.return_data.to_vec())
-            .expect("output must be decodable with `ContractFunction` that has encoded input. q.e.d.");
-         Ok(output)
+        let output = f.output(result.return_data.to_vec()).expect(
+            "output must be decodable with `ContractFunction` that has encoded input. q.e.d.",
+        );
+        Ok(output)
     }
 
-    fn raw_transact(&mut self, env_info: &vm::EnvInfo, transaction: SignedTransaction) -> error::Result<TransactionOutput> {
+    fn raw_transact(
+        &mut self,
+        env_info: &vm::EnvInfo,
+        transaction: SignedTransaction,
+    ) -> error::Result<TransactionOutput> {
         if self.is_tracing_enabled {
             let mut tracers = self.tracers();
-            Ok(split_transact_result(self.evm.transact(env_info, transaction, tracers.0, tracers.1))?.into())
+            Ok(split_transact_result(self.evm.transact(
+                env_info,
+                transaction,
+                tracers.0,
+                tracers.1,
+            ))?.into())
         } else {
-            let transact_success = split_transact_result(self.evm.transact(env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer))?;
+            let transact_success = split_transact_result(self.evm.transact(
+                env_info,
+                transaction,
+                ethcore::trace::NoopTracer,
+                ethcore::trace::NoopVMTracer,
+            ))?;
             self.logs.extend(transact_success.logs.clone());
             Ok(transact_success.into())
         }
