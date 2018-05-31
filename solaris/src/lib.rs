@@ -7,6 +7,9 @@ extern crate evm as ethcore_evm;
 extern crate vm;
 
 #[macro_use]
+extern crate error_chain;
+
+#[macro_use]
 extern crate lazy_static;
 
 /// re-export these for now since they provide useful conversion from
