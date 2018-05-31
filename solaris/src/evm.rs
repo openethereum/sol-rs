@@ -99,7 +99,7 @@ fn split_transact_result<T, V>(
     }
 }
 
-struct TransactionOutput {
+pub struct TransactionOutput {
     state_root: H256,
     gas_left: U256,
     output: Vec<u8>,
@@ -235,7 +235,7 @@ impl Evm {
         func(self).expect("Unexpected error occured.");
     }
 
-    fn call<F: ContractFunction>(&mut self, f: F) -> error::Result<F::Output> {
+    pub fn call<F: ContractFunction>(&mut self, f: F) -> error::Result<F::Output> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let mut params = vm::ActionParams::default();
@@ -267,7 +267,7 @@ impl Evm {
         Ok(output)
     }
 
-    fn raw_transact(
+    pub fn raw_transact(
         &mut self,
         env_info: &vm::EnvInfo,
         transaction: SignedTransaction,
@@ -292,7 +292,7 @@ impl Evm {
         }
     }
 
-    fn transact<F: ContractFunction>(&mut self, f: F) -> error::Result<TransactionOutput> {
+    pub fn transact<F: ContractFunction>(&mut self, f: F) -> error::Result<TransactionOutput> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let env_info = self.env_info();
