@@ -206,84 +206,7 @@ impl Evm {
         func(self).expect("Unexpected error occured.");
     }
 
-    fn evm_transact<O, F>(
-        &mut self,
-        env_info: &vm::EnvInfo,
-        transaction: SignedTransaction,
-        with_tracing: bool,
-        result: F,
-    ) -> Result<O, String>
-    where
-        F: FnOnce(&mut Self, Vec<u8>, Option<Address>) -> Result<O, String>,
-    {
-        let evm_result = if with_tracing {
-            let tracers = self.tracers();
-            match self.evm
-                .transact(&env_info, transaction, tracers.0, tracers.1)
-            {
-                TransactResult::Ok {
-                    output,
-                    gas_left,
-                    logs,
-                    outcome,
-                    contract_address,
-                    ..
-                } => {
-                    self.logs.extend(logs);
-                    Ok((output, gas_left, outcome, contract_address))
-                }
-                e => Err(format!("EVM Error: {:?}", e)),
-            }
-        } else {
-            match self.evm.transact(
-                &env_info,
-                transaction,
-                ethcore::trace::NoopTracer,
-                ethcore::trace::NoopVMTracer,
-            ) {
-                TransactResult::Ok {
-                    output,
-                    gas_left,
-                    outcome,
-                    contract_address,
-                    ..
-                } => Ok((output, gas_left, outcome, contract_address)),
-                e => Err(format!("EVM Error: {:?}", e)),
-            }
-        }?;
-
-        let (output, gas_left, outcome, contract_address) = evm_result;
-        let contract_address = contract_address.map(|x| (&*x).into());
-        match outcome {
-            ethcore::receipt::TransactionOutcome::Unknown
-            | ethcore::receipt::TransactionOutcome::StateRoot(_) => {
-                // TODO [ToDr] Shitty detection of failed calls?
-                if gas_left > 0.into() {
-                    result(self, output, contract_address)
-                } else {
-                    Err(format!("Call went out of gas."))
-                }
-            }
-            ethcore::receipt::TransactionOutcome::StatusCode(status) => {
-                if status == 1 {
-                    result(self, output, contract_address)
-                } else {
-                    Err(format!("Call failed with status code: {}", status))
-                }
-            }
-        }
-    }
-}
-
-const STATE: &str = "State failure.";
-
-impl<'a, Out> ethabi::Call<Out> for &'a mut Evm {
-    type Result = Result<ethabi::Bytes, String>;
-
-    fn call<D: 'static>(self, bytes: ethabi::Bytes, output_decoder: D) -> Self::Result
-    where
-        D: FnOnce(ethabi::Bytes) -> ethabi::Result<Out>,
-    {
+    fn call<F: ContractFunction>(&mut self, f: F) -> error::Result<F::Output> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let mut params = vm::ActionParams::default();
@@ -292,32 +215,36 @@ impl<'a, Out> ethabi::Call<Out> for &'a mut Evm {
         params.address = contract_address;
         params.code_address = contract_address;
         params.code = self.evm.state().code(&contract_address).expect(STATE);
-        params.data = Some((&*bytes).into());
+        params.data = Some(f.encoded());
         params.call_type = vm::CallType::Call;
         params.value = vm::ActionValue::Transfer(self.value);
         params.gas = self.gas;
         params.gas_price = self.gas_price;
 
-        let mut tracers = self.tracers();
-        let result = self.evm.call(params, &mut tracers.0, &mut tracers.1);
+        let result = if self.is_tracing_enabled {
+            let mut tracers = self.tracers();
+            self.evm.call(params, &mut tracers.0, &mut tracers.1)?
+        } else {
+            self.evm.call(params, &mut ethcore::trace::NoopTracer, &mut ethcore::trace::NoopVMTracer)?
+        };
 
-        match result {
-            Ok(result) => Ok((&*result.return_data).into()),
-            Err(err) => {
-                // TODO [ToDr] Nice errors.
-                Err(format!("Unexpected error: {:?}", err))
-            }
+        let output = f.output(result.return_data.to_vec())
+            .expect("output must be decodable with `ContractFunction` that has encoded input. q.e.d.");
+         Ok(output)
+    }
+
+    fn raw_transact(&mut self, env_info: &vm::EnvInfo, transaction: SignedTransaction) -> error::Result<TransactionOutput> {
+        if self.is_tracing_enabled {
+            let mut tracers = self.tracers();
+            Ok(split_transact_result(self.evm.transact(env_info, transaction, tracers.0, tracers.1))?.into())
+        } else {
+            let transact_success = split_transact_result(self.evm.transact(env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer))?;
+            self.logs.extend(transact_success.logs.clone());
+            Ok(transact_success.into())
         }
     }
-}
 
-impl<'a, Out> ethabi::Transact<Out> for &'a mut Evm {
-    type Result = Result<ethabi::Bytes, String>;
-
-    fn transact<D: 'static>(self, bytes: ethabi::Bytes, output_decoder: D) -> Self::Result
-    where
-        D: FnOnce(ethabi::Bytes) -> ethabi::Result<Out>,
-    {
+    fn transact<F: ContractFunction>(&mut self, f: F) -> error::Result<TransactionOutput> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let env_info = self.env_info();
@@ -328,9 +255,11 @@ impl<'a, Out> ethabi::Transact<Out> for &'a mut Evm {
             gas: self.gas,
             action: Action::Call(contract_address),
             value: self.value,
-            data: bytes.to_vec(),
+            data: f.encoded(),
         }.fake_sign(self.sender);
 
-        self.evm_transact(&env_info, transaction, true, |_, output, _| Ok(output))
+        self.raw_transact(&env_info, transaction)
     }
 }
+
+const STATE: &str = "State failure.";
