@@ -13,7 +13,7 @@ use types::{Address, U256};
 use_contract!(
     get_sender_test,
     "GetSenderTest",
-    "contracts/GetSenderTest.abi"
+    "contracts/test_sol_GetSenderTest.abi"
 );
 
 #[test]
@@ -22,7 +22,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 
     let contract_owner_address: Address = 3.into();
 
-    let code_hex = include_str!("../contracts/GetSenderTest.bin");
+    let code_hex = include_str!("../contracts/test_sol_GetSenderTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
@@ -40,11 +40,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
     assert_eq!(output, sender);
 }
 
-use_contract!(
-    get_value_test,
-    "GetValueTest",
-    "contracts/GetValueTest.abi"
-);
+use_contract!(get_value_test, "GetValueTest", "contracts/test_sol_GetValueTest.abi");
 
 #[test]
 fn msg_value_should_match_value_passed_into_with_value() {
@@ -52,7 +48,7 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
     let contract_owner_address: Address = 3.into();
 
-    let code_hex = include_str!("../contracts/GetValueTest.bin");
+    let code_hex = include_str!("../contracts/test_sol_GetValueTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
