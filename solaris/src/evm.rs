@@ -17,6 +17,7 @@ pub struct Evm {
     value: U256,
     gas: U256,
     gas_price: U256,
+    is_tracing_enabled: bool,
     logs: Vec<ethcore::log_entry::LogEntry>,
 }
 
@@ -37,6 +38,7 @@ impl Evm {
             gas_price: 0.into(),
             value: 0.into(),
             logs: vec![],
+            is_tracing_enabled: false,
         }
     }
 
@@ -97,6 +99,11 @@ impl Evm {
 
     pub fn with_sender(&mut self, address: Address) -> &mut Self {
         self.sender = address;
+        self
+    }
+
+    pub fn with_tracing(&mut self, is_tracing_enabled: bool) -> &mut Self {
+        self.is_tracing_enabled = is_tracing_enabled;
         self
     }
 
