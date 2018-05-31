@@ -144,7 +144,7 @@ impl Evm {
         }
     }
 
-    pub fn deploy(&mut self, code: &[u8]) -> Result<Address, String> {
+    pub fn deploy(&mut self, code: &[u8]) -> error::Result<Address> {
         let env_info = self.env_info();
         let nonce = self.evm.state().nonce(&self.sender).expect(STATE);
         let transaction = Transaction {
@@ -156,16 +156,14 @@ impl Evm {
             data: code.to_vec(),
         }.fake_sign((&*self.sender).into());
 
-        self.evm_transact(
-            &env_info,
-            transaction,
-            true,
-            |s, _output, contract_address| {
-                s.contract_address = contract_address;
-                s.contract_address
-                    .ok_or_else(|| "Contract address missing.".into())
-            },
-        )
+        let transaction_output = self.raw_transact(&env_info, transaction)?;
+
+        let contract_address = transaction_output.contract_address
+            .expect("transaction output must have contract_address after deploy");
+
+        self.contract_address = Some(contract_address);
+
+        Ok(contract_address)
     }
 
     pub fn with_gas(&mut self, gas: U256) -> &mut Self {
