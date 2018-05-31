@@ -30,6 +30,7 @@ impl Default for Evm {
     }
 }
 
+// temporary workaround for https://github.com/paritytech/parity/issues/8755
 struct TransactSuccess<T, V> {
     /// State root
     state_root: H256,
@@ -71,6 +72,7 @@ impl<T, V> From<TransactSuccess<T, V>> for TransactionOutput {
     }
 }
 
+// temporary workaround for https://github.com/paritytech/parity/issues/8755
 #[derive(Debug)]
 pub struct TransactError {
     /// State root
@@ -91,6 +93,7 @@ impl fmt::Display for TransactError {
     }
 }
 
+// temporary workaround for https://github.com/paritytech/parity/issues/8755
 fn split_transact_result<T, V>(
     result: TransactResult<T, V>,
 ) -> Result<TransactSuccess<T, V>, TransactError> {
