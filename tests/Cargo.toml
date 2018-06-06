@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Maximilian Krüger <kruemaxi@gmail.com>"]
 
 [dependencies]
-ethabi = { git = "https://github.com/paritytech/ethabi.git" }
+ethabi = { git = "https://github.com/paritytech/ethabi.git", branch = "ac-fix-output" }
 ethabi-derive = { git = "https://github.com/paritytech/ethabi.git" }
 ethabi-contract = { git = "https://github.com/paritytech/ethabi.git" }
 solaris = { path = "../solaris", version = "0.1" }
