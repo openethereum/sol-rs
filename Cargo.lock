@@ -348,20 +348,6 @@ dependencies = [
 
 [[package]]
 name = "ethabi"
-version = "6.0.0"
-source = "git+https://github.com/paritytech/ethabi.git#7b9cca375986b948d84530442d6bd27d480b24c8"
-dependencies = [
- "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "ethereum-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustc-hex 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.64 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.64 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_json 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)",
- "tiny-keccak 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "ethabi"
 version = "6.0.1"
 source = "git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output#a3bc6173161aa4b5317d93d3876fa1ee658b4249"
 dependencies = [
@@ -381,11 +367,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "ethabi-contract"
-version = "6.0.0"
-source = "git+https://github.com/paritytech/ethabi.git#7b9cca375986b948d84530442d6bd27d480b24c8"
-
-[[package]]
-name = "ethabi-contract"
 version = "6.0.1"
 source = "git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output#a3bc6173161aa4b5317d93d3876fa1ee658b4249"
 
@@ -395,17 +376,6 @@ version = "5.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "ethabi 5.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "heck 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "quote 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 0.13.11 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "ethabi-derive"
-version = "6.0.0"
-source = "git+https://github.com/paritytech/ethabi.git#7b9cca375986b948d84530442d6bd27d480b24c8"
-dependencies = [
- "ethabi 6.0.0 (git+https://github.com/paritytech/ethabi.git)",
  "heck 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "syn 0.13.11 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1276,7 +1246,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "num-integer 0.1.38 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.24 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1572,7 +1542,7 @@ dependencies = [
  "lazy_static 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.41 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1866,8 +1836,8 @@ name = "solaris-tests"
 version = "0.1.0"
 dependencies = [
  "ethabi 6.0.1 (git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output)",
- "ethabi-contract 6.0.0 (git+https://github.com/paritytech/ethabi.git)",
- "ethabi-derive 6.0.0 (git+https://github.com/paritytech/ethabi.git)",
+ "ethabi-contract 6.0.1 (git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output)",
+ "ethabi-derive 6.0.1 (git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output)",
  "ethereum-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-hex 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "solaris 0.1.0",
@@ -2464,13 +2434,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ff511d5dc435d703f4971bc399647c9bc38e20cb41452e3b9feb4765419ed3f3"
 "checksum eth-secp256k1 0.5.7 (git+https://github.com/paritytech/rust-secp256k1)" = "<none>"
 "checksum ethabi 5.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "05e33a914b94b763f0a92333e4e5c95c095563f06ef7d6b295b3d3c2cf31e21f"
-"checksum ethabi 6.0.0 (git+https://github.com/paritytech/ethabi.git)" = "<none>"
 "checksum ethabi 6.0.1 (git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output)" = "<none>"
 "checksum ethabi-contract 5.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "210c9e21d164c15b6ef64fe601e0e12a3c84a031d5ef558e38463e53edbd22ed"
-"checksum ethabi-contract 6.0.0 (git+https://github.com/paritytech/ethabi.git)" = "<none>"
 "checksum ethabi-contract 6.0.1 (git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output)" = "<none>"
 "checksum ethabi-derive 5.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "d2bc7099baa147187aedaecd9fe04a6c0541c82bc43ff317cb6900fe2b983d74"
-"checksum ethabi-derive 6.0.0 (git+https://github.com/paritytech/ethabi.git)" = "<none>"
 "checksum ethabi-derive 6.0.1 (git+https://github.com/paritytech/ethabi.git?branch=ac-fix-output)" = "<none>"
 "checksum ethash 1.12.0 (git+https://github.com/paritytech/parity.git)" = "<none>"
 "checksum ethbloom 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1a93a43ce2e9f09071449da36bfa7a1b20b950ee344b6904ff23de493b03b386"
