@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 
 [dependencies]
-ethabi = { git = "https://github.com/paritytech/ethabi.git", branch = "ac-fix-output" }
-ethabi-derive = { git = "https://github.com/paritytech/ethabi.git", branch = "ac-fix-output" }
-ethabi-contract = { git = "https://github.com/paritytech/ethabi.git", branch = "ac-fix-output" }
+ethabi = { git = "https://github.com/paritytech/ethabi.git" }
+ethabi-derive = { git = "https://github.com/paritytech/ethabi.git" }
+ethabi-contract = { git = "https://github.com/paritytech/ethabi.git" }
 solaris = { path = "../solaris", version = "0.1" }
 ethereum-types = "0.3"
 rustc-hex = "1.0"
