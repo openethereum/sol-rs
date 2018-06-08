@@ -9,3 +9,17 @@ contract GetValueTest {
         return msg.value;
     }
 }
+
+contract EventLogTest {
+    event Foo(address sender);
+    event Bar(uint value);
+    event Baz();
+
+    function emitFoo() public {
+        Foo(msg.sender);
+    }
+
+    function emitBar(uint value) public {
+        Bar(value);
+    }
+}

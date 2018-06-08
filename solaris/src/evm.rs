@@ -1,11 +1,14 @@
 use std::sync::Arc;
 
-use ethabi;
+use ethabi::ContractFunction;
 use ethcore;
 use ethcore::client::{EvmTestClient, TransactResult};
-use ethcore_transaction::{Transaction, Action, SignedTransaction};
-use ethereum_types::{U256, Address};
+use ethcore_transaction::{Action, SignedTransaction, Transaction};
+use ethereum_types::{Address, H160, H256, U256};
 use vm;
+use error;
+use std::error::Error;
+use std::fmt;
 
 use trace;
 
@@ -17,12 +20,104 @@ pub struct Evm {
     value: U256,
     gas: U256,
     gas_price: U256,
+    is_tracing_enabled: bool,
     logs: Vec<ethcore::log_entry::LogEntry>,
 }
 
 impl Default for Evm {
     fn default() -> Self {
         Evm::new_current()
+    }
+}
+
+// temporary workaround for https://github.com/paritytech/parity/issues/8755
+struct TransactSuccess<T, V> {
+    /// State root
+    state_root: H256,
+    /// Amount of gas left
+    gas_left: U256,
+    /// Output
+    output: Vec<u8>,
+    /// Traces
+    trace: Vec<T>,
+    /// VM Traces
+    vm_trace: Option<V>,
+    /// Created contract address (if any)
+    contract_address: Option<H160>,
+    /// Generated logs
+    logs: Vec<ethcore::log_entry::LogEntry>,
+    /// outcome
+    outcome: ethcore::receipt::TransactionOutcome,
+}
+
+// temporary workaround for https://github.com/paritytech/parity/issues/8755
+#[derive(Debug)]
+pub struct TransactError {
+    /// State root
+    state_root: H256,
+    /// Execution error
+    error: ethcore::error::Error,
+}
+
+impl Error for TransactError {
+    fn description(&self) -> &str {
+        "error transacting with the test evm"
+    }
+}
+
+impl fmt::Display for TransactError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+// temporary workaround for https://github.com/paritytech/parity/issues/8755
+fn split_transact_result<T, V>(
+    result: TransactResult<T, V>,
+) -> Result<TransactSuccess<T, V>, TransactError> {
+    match result {
+        TransactResult::Ok {
+            state_root,
+            gas_left,
+            output,
+            trace,
+            vm_trace,
+            contract_address,
+            logs,
+            outcome,
+        } => Ok(TransactSuccess {
+            state_root,
+            gas_left,
+            output,
+            trace,
+            vm_trace,
+            contract_address,
+            logs,
+            outcome,
+        }),
+        TransactResult::Err { state_root, error } => Err(TransactError { state_root, error }),
+    }
+}
+
+pub struct TransactionOutput {
+    state_root: H256,
+    gas_left: U256,
+    output: Vec<u8>,
+    contract_address: Option<H160>,
+    logs: Vec<ethcore::log_entry::LogEntry>,
+    outcome: ethcore::receipt::TransactionOutcome,
+}
+
+impl<T, V> From<TransactSuccess<T, V>> for TransactionOutput {
+    fn from(t: TransactSuccess<T, V>) -> Self {
+        TransactionOutput {
+            state_root: t.state_root,
+            gas_left: t.gas_left,
+            output: t.output,
+            contract_address: t.contract_address,
+            logs: t.logs,
+            outcome: t.outcome,
+        }
     }
 }
 
@@ -37,6 +132,7 @@ impl Evm {
             gas_price: 0.into(),
             value: 0.into(),
             logs: vec![],
+            is_tracing_enabled: false,
         }
     }
 
@@ -56,7 +152,7 @@ impl Evm {
         }
     }
 
-    pub fn deploy(&mut self, code: &[u8]) -> Result<Address, String> {
+    pub fn deploy(&mut self, code: &[u8]) -> error::Result<Address> {
         let env_info = self.env_info();
         let nonce = self.evm.state().nonce(&self.sender).expect(STATE);
         let transaction = Transaction {
@@ -68,10 +164,15 @@ impl Evm {
             data: code.to_vec(),
         }.fake_sign((&*self.sender).into());
 
-        self.evm_transact(&env_info, transaction, true, |s, _output, contract_address| {
-            s.contract_address = contract_address;
-            s.contract_address.ok_or_else(|| "Contract address missing.".into())
-        })
+        let transaction_output = self.raw_transact(&env_info, transaction)?;
+
+        let contract_address = transaction_output
+            .contract_address
+            .expect("transaction output must have contract_address after deploy");
+
+        self.contract_address = Some(contract_address);
+
+        Ok(contract_address)
     }
 
     pub fn with_gas(&mut self, gas: U256) -> &mut Self {
@@ -94,6 +195,11 @@ impl Evm {
         self
     }
 
+    pub fn with_tracing(&mut self, is_tracing_enabled: bool) -> &mut Self {
+        self.is_tracing_enabled = is_tracing_enabled;
+        self
+    }
+
     /// Ensures that sender has enough funds (value) to call next transaction.
     pub fn ensure_funds(&mut self) -> &mut Self {
         // TODO [ToDr] Just transfer to amount that is actually needed
@@ -111,81 +217,34 @@ impl Evm {
             data: vec![],
         }.fake_sign(sender);
 
-        self.evm_transact(&env_info, transaction, false, |_, _, _| Ok(()))
+        self.raw_transact(&env_info, transaction)
             .expect("Unable to top up account.");
         self
     }
 
-    pub fn logs(&self, _filter: ::ethabi::TopicFilter) -> Vec<()> {
-        // TODO [ToDr] Add filter querying
-        self.logs.iter().map(|_| ()).collect()
+    /// returns a vector of all logs that were collected for a specific `event`.
+    /// the logs are conveniently converted to the events log struct `T::Log`.
+    pub fn logs<T: ethabi::ParseLog>(&self, event: T) -> Vec<T::Log> {
+        self.logs
+            .iter()
+            .filter_map(|log| event.parse_log(log_entry_to_raw_log(log)).ok())
+            .collect()
+    }
+
+    /// returns a vector of all raw logs collected until now
+    pub fn raw_logs(&self) -> Vec<ethabi::RawLog> {
+        self.logs.iter().map(log_entry_to_raw_log).collect()
     }
 
     /// Run the EVM and panic on all errors.
-    pub fn run<F>(self, func: F) where
+    pub fn run<F>(self, func: F)
+    where
         F: FnOnce(Self) -> ::ethabi::Result<()>,
     {
         func(self).expect("Unexpected error occured.");
     }
 
-    fn evm_transact<O, F>(
-        &mut self,
-        env_info: &vm::EnvInfo,
-        transaction: SignedTransaction,
-        with_tracing: bool,
-        result: F,
-    ) -> Result<O, String> where
-        F: FnOnce(&mut Self, Vec<u8>, Option<Address>) -> Result<O, String>,
-    {
-        let evm_result = if with_tracing {
-            let tracers = self.tracers();
-            match self.evm.transact(&env_info, transaction, tracers.0, tracers.1) {
-                TransactResult::Ok { output, gas_left, logs, outcome, contract_address, .. } => {
-                    self.logs.extend(logs);
-                    Ok((output, gas_left, outcome, contract_address))
-                },
-                e => Err(format!("EVM Error: {:?}", e)),
-            }
-        } else {
-            match self.evm.transact(&env_info, transaction, ethcore::trace::NoopTracer, ethcore::trace::NoopVMTracer) {
-                TransactResult::Ok { output, gas_left, outcome, contract_address, .. } => {
-                    Ok((output, gas_left, outcome, contract_address))
-                },
-                e => Err(format!("EVM Error: {:?}", e)),
-            }
-        }?;
-
-        let (output, gas_left, outcome, contract_address) = evm_result;
-        let contract_address = contract_address.map(|x| (&*x).into());
-        match outcome {
-            ethcore::receipt::TransactionOutcome::Unknown |
-            ethcore::receipt::TransactionOutcome::StateRoot(_) => {
-                // TODO [ToDr] Shitty detection of failed calls?
-                if gas_left > 0.into() {
-                    result(self, output, contract_address)
-                } else {
-                    Err(format!("Call went out of gas."))
-                }
-            },
-            ethcore::receipt::TransactionOutcome::StatusCode(status) => {
-                if status == 1 {
-                    result(self, output, contract_address)
-                } else {
-                    Err(format!("Call failed with status code: {}", status))
-                }
-            },
-        }
-    }
-}
-
-
-const STATE: &str = "State failure.";
-
-impl<'a> ethabi::Caller for &'a mut Evm {
-    type CallOut = Result<ethabi::Bytes, String>;
-    type TransactOut = Result<ethabi::Bytes, String>;
-
-    fn call(self, bytes: ethabi::Bytes) -> Self::CallOut {
+    pub fn call<F: ContractFunction>(&mut self, f: F) -> error::Result<F::Output> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let mut params = vm::ActionParams::default();
@@ -193,29 +252,56 @@ impl<'a> ethabi::Caller for &'a mut Evm {
         params.origin = self.sender;
         params.address = contract_address;
         params.code_address = contract_address;
-        params.code = self.evm.state()
-            .code(&contract_address).expect(STATE);
-        params.data = Some((&*bytes).into());
+        params.code = self.evm.state().code(&contract_address).expect(STATE);
+        params.data = Some(f.encoded());
         params.call_type = vm::CallType::Call;
         params.value = vm::ActionValue::Transfer(self.value);
         params.gas = self.gas;
         params.gas_price = self.gas_price;
 
-        let mut tracers = self.tracers();
-        let result = self.evm.call(params, &mut tracers.0, &mut tracers.1);
+        let result = if self.is_tracing_enabled {
+            let mut tracers = self.tracers();
+            self.evm.call(params, &mut tracers.0, &mut tracers.1)?
+        } else {
+            self.evm.call(
+                params,
+                &mut ethcore::trace::NoopTracer,
+                &mut ethcore::trace::NoopVMTracer,
+            )?
+        };
 
-        match result {
-            Ok(result) => {
-                Ok((&*result.return_data).into())
-            },
-            Err(err) => {
-                // TODO [ToDr] Nice errors.
-                Err(format!("Unexpected error: {:?}", err))
-            },
+        let output = f.output(result.return_data.to_vec()).expect(
+            "output must be decodable with `ContractFunction` that has encoded input. q.e.d.",
+        );
+        Ok(output)
+    }
+
+    pub fn raw_transact(
+        &mut self,
+        env_info: &vm::EnvInfo,
+        transaction: SignedTransaction,
+    ) -> error::Result<TransactionOutput> {
+        if self.is_tracing_enabled {
+            let mut tracers = self.tracers();
+            Ok(split_transact_result(self.evm.transact(
+                env_info,
+                transaction,
+                tracers.0,
+                tracers.1,
+            ))?.into())
+        } else {
+            let transact_success = split_transact_result(self.evm.transact(
+                env_info,
+                transaction,
+                ethcore::trace::NoopTracer,
+                ethcore::trace::NoopVMTracer,
+            ))?;
+            self.logs.extend(transact_success.logs.clone());
+            Ok(transact_success.into())
         }
     }
 
-    fn transact(self, bytes: ethabi::Bytes) -> Self::TransactOut {
+    pub fn transact<F: ContractFunction>(&mut self, f: F) -> error::Result<TransactionOutput> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let env_info = self.env_info();
@@ -226,9 +312,17 @@ impl<'a> ethabi::Caller for &'a mut Evm {
             gas: self.gas,
             action: Action::Call(contract_address),
             value: self.value,
-            data: bytes.to_vec(),
+            data: f.encoded(),
         }.fake_sign(self.sender);
 
-        self.evm_transact(&env_info, transaction, true, |_, output, _| Ok(output))
+        self.raw_transact(&env_info, transaction)
     }
+}
+
+/// converts an `ethcore::log_entry::LogEntry` to an `ethabi::RawLog`
+/// since the events in a contract derived with `ethabi` can only
+/// be parsed from `ethabi::RawLog` (via `event.parse_log(raw_log)`)
+fn log_entry_to_raw_log(log_entry: &ethcore::log_entry::LogEntry) -> ethabi::RawLog {
+	let topics: Vec<ethabi::Hash> = log_entry.topics.iter().map(|x| x.0).collect();
+	ethabi::RawLog::from((topics, log_entry.data.clone()))
 }
