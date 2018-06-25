@@ -1,7 +1,7 @@
-use ethereum_types::{H160, U256};
-use ethcore::trace::trace::{Call, Create};
 use ethcore::trace;
+use ethcore::trace::trace::{Call, Create};
 use ethcore_bytes::{Bytes, ToPretty};
+use ethereum_types::{H160, U256};
 use vm;
 
 #[derive(Debug)]
@@ -168,11 +168,8 @@ impl trace::VMTracer for PrintingTracer {
         let info = ::ethcore_evm::INSTRUCTIONS[self.instruction as usize];
 
         let len = self.stack.len();
-        self.stack.truncate(if len > info.args {
-            len - info.args
-        } else {
-            0
-        });
+        self.stack
+            .truncate(if len > info.args { len - info.args } else { 0 });
         self.stack.extend_from_slice(stack_push);
 
         println!(

@@ -28,9 +28,9 @@ fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {
 #[cfg(test)]
 use rustc_hex::FromHex;
 #[cfg(test)]
-use solaris::wei;
-#[cfg(test)]
 use solaris::convert;
+#[cfg(test)]
+use solaris::wei;
 
 #[cfg(test)]
 use types::{Address, H256, U256};

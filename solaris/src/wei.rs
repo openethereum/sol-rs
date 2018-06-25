@@ -1,5 +1,4 @@
 /// conversion of the various ether units (shannon, gwei, ...) to wei
-
 use ethereum_types::U256;
 
 lazy_static! {
