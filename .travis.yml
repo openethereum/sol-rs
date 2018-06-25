@@ -9,7 +9,7 @@ cache: cargo
 matrix:
   fast_finish: false
   include:
-    - rust: stable
+    - rust: stable-2018-06-21
 
 addons:
   apt:
