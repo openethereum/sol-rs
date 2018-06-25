@@ -20,7 +20,6 @@ pub struct Evm {
     value: U256,
     gas: U256,
     gas_price: U256,
-    is_tracing_enabled: bool,
     logs: Vec<ethcore::log_entry::LogEntry>,
 }
 
@@ -132,7 +131,6 @@ impl Evm {
             gas_price: 0.into(),
             value: 0.into(),
             logs: vec![],
-            is_tracing_enabled: false,
         }
     }
 
@@ -195,11 +193,6 @@ impl Evm {
         self
     }
 
-    pub fn with_tracing(&mut self, is_tracing_enabled: bool) -> &mut Self {
-        self.is_tracing_enabled = is_tracing_enabled;
-        self
-    }
-
     /// Ensures that sender has enough funds (value) to call next transaction.
     pub fn ensure_funds(&mut self) -> &mut Self {
         // TODO [ToDr] Just transfer to amount that is actually needed
@@ -250,16 +243,8 @@ impl Evm {
         params.gas = self.gas;
         params.gas_price = self.gas_price;
 
-        let result = if self.is_tracing_enabled {
-            let mut tracers = self.tracers();
-            self.evm.call(params, &mut tracers.0, &mut tracers.1)?
-        } else {
-            self.evm.call(
-                params,
-                &mut ethcore::trace::NoopTracer,
-                &mut ethcore::trace::NoopVMTracer,
-            )?
-        };
+        let mut tracers = self.tracers();
+        let result = self.evm.call(params, &mut tracers.0, &mut tracers.1)?;
 
         let output = f.output(result.return_data.to_vec()).expect(
             "output must be decodable with `ContractFunction` that has encoded input. q.e.d.",
@@ -272,24 +257,14 @@ impl Evm {
         env_info: &vm::EnvInfo,
         transaction: SignedTransaction,
     ) -> error::Result<TransactionOutput> {
-        if self.is_tracing_enabled {
-            let mut tracers = self.tracers();
-            Ok(split_transact_result(self.evm.transact(
-                env_info,
-                transaction,
-                tracers.0,
-                tracers.1,
-            ))?.into())
-        } else {
-            let transact_success = split_transact_result(self.evm.transact(
-                env_info,
-                transaction,
-                ethcore::trace::NoopTracer,
-                ethcore::trace::NoopVMTracer,
-            ))?;
-            self.logs.extend(transact_success.logs.clone());
-            Ok(transact_success.into())
-        }
+        let mut tracers = self.tracers();
+        let transact_success =
+            split_transact_result(
+                self.evm
+                    .transact(env_info, transaction, tracers.0, tracers.1),
+            )?;
+        self.logs.extend(transact_success.logs.clone());
+        Ok(transact_success.into())
     }
 
     pub fn transact<F: ContractFunction>(&mut self, f: F) -> error::Result<TransactionOutput> {
