@@ -215,9 +215,18 @@ impl Evm {
         self
     }
 
-    pub fn logs(&self, _filter: ::ethabi::TopicFilter) -> Vec<()> {
-        // TODO [ToDr] Add filter querying
-        self.logs.iter().map(|_| ()).collect()
+    /// returns a vector of all logs that were collected for a specific `event`.
+    /// the logs are conveniently converted to the events log struct `T::Log`.
+    pub fn logs_for_event<T: ethabi::ParseLog>(&self, event: T) -> Vec<T::Log> {
+        self.logs
+            .iter()
+            .filter_map(|log| event.parse_log(ethcore_log_to_ethabi_log(log)).ok())
+            .collect()
+    }
+
+    /// returns a vector of all raw logs collected until now
+    pub fn raw_logs(&self) -> Vec<ethabi::RawLog> {
+        self.logs.iter().map(ethcore_log_to_ethabi_log).collect()
     }
 
     /// Run the EVM and panic on all errors.
@@ -286,3 +295,10 @@ impl Evm {
 }
 
 const STATE: &str = "State failure.";
+
+/// converts an `ethcore::log_entry::LogEntry` to an `ethabi::RawLog`
+/// since the events in a contract derived with `ethabi` can only
+/// be parsed from `ethabi::RawLog` (via `event.parse_log(raw_log)`)
+fn ethcore_log_to_ethabi_log(input: &ethcore::log_entry::LogEntry) -> ethabi::RawLog {
+    ethabi::RawLog::from((input.topics.clone(), input.data.clone()))
+}

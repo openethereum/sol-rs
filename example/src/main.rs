@@ -75,13 +75,9 @@ fn anyone_should_be_able_to_register_a_badge() {
         )
         .unwrap();
 
-    // TODO [ToDr] The API here is crap, we need to work on sth better.
-    // Check that the event has been fired.
     assert_eq!(
-        evm.logs(
-            badgereg::events::Registered::default()
-                .create_filter(H256::from(convert::bytes32("test")), ethabi::Topic::Any,)
-        ).len(),
+        evm.logs_for_event(badgereg::events::Registered::default())
+            .len(),
         1
     );
 
