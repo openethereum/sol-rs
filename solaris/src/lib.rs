@@ -18,10 +18,10 @@ pub use ethereum_types::{Address, U256};
 
 mod trace;
 
-pub mod evm;
 pub mod convert;
-pub mod wei;
 pub mod error;
+pub mod evm;
+pub mod wei;
 
 lazy_static! {
     pub static ref FOUNDATION: ethcore::spec::Spec =

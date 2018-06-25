@@ -18,8 +18,8 @@ mod platform {
     }
 }
 
-use std::{fs, io};
 use std::path::Path;
+use std::{fs, io};
 
 /// Compiles all solidity files in given directory.
 pub fn compile<T: AsRef<Path>>(path: T) {
