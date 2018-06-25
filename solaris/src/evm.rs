@@ -267,7 +267,7 @@ impl Evm {
         Ok(output)
     }
 
-    pub fn raw_transact(
+    fn raw_transact(
         &mut self,
         env_info: &vm::EnvInfo,
         transaction: SignedTransaction,
