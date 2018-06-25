@@ -23,5 +23,4 @@ before_install:
   - npm install -g solc
 
 script:
-  - cargo check --all
   - cargo test --all
