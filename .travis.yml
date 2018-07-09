@@ -9,7 +9,7 @@ cache: cargo
 matrix:
   fast_finish: false
   include:
-    - rust: stable
+    - rust: stable-2018-06-21
 
 addons:
   apt:
@@ -23,5 +23,4 @@ before_install:
   - npm install -g solc
 
 script:
-  - cargo check --all
   - cargo test --all
