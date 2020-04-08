@@ -2,7 +2,7 @@
 //! By Gav Wood (Ethcore), 2016.
 //! Released under the Apache Licence 2.
 
-pragma solidity ^0.4.17;
+pragma solidity ^0.5.17;
 
 import "Owned.sol";
 
@@ -33,12 +33,12 @@ contract BadgeReg is Owned {
 		badges.push(Badge(_addr, _name, _owner));
 		mapFromAddress[_addr] = badges.length;
 		mapFromName[_name] = badges.length;
-		Registered(_name, badges.length - 1, _addr);
+		emit Registered(_name, badges.length - 1, _addr);
 		return true;
 	}
 
 	function unregister(uint _id) only_owner public {
-		Unregistered(badges[_id].name, _id);
+		emit Unregistered(badges[_id].name, _id);
 		delete mapFromAddress[badges[_id].addr];
 		delete mapFromName[badges[_id].name];
 		delete badges[_id];
@@ -48,48 +48,48 @@ contract BadgeReg is Owned {
 		fee = _fee;
 	}
 
-	function badgeCount() constant public returns (uint) { return badges.length; }
+	function badgeCount() view public returns (uint) { return badges.length; }
 
-	function badge(uint _id) constant public returns (address addr, bytes32 name, address owner) {
-		var t = badges[_id];
+	function badge(uint _id) view public returns (address addr, bytes32 name, address owner) {
+		Badge memory t = badges[_id];
 		addr = t.addr;
 		name = t.name;
 		owner = t.owner;
 	}
 
-	function fromAddress(address _addr) constant public returns (uint id, bytes32 name, address owner) {
+	function fromAddress(address _addr) view public returns (uint id, bytes32 name, address owner) {
 		id = mapFromAddress[_addr] - 1;
-		var t = badges[id];
+		Badge memory t = badges[id];
 		name = t.name;
 		owner = t.owner;
 	}
 
-	function fromName(bytes32 _name) constant public returns (uint id, address addr, address owner) {
+	function fromName(bytes32 _name) view public returns (uint id, address addr, address owner) {
 		id = mapFromName[_name] - 1;
-		var t = badges[id];
+		Badge memory t = badges[id];
 		addr = t.addr;
 		owner = t.owner;
 	}
 
-	function meta(uint _id, bytes32 _key) constant public returns (bytes32) {
+	function meta(uint _id, bytes32 _key) view public returns (bytes32) {
 		return badges[_id].meta[_key];
 	}
 
 	function setAddress(uint _id, address _newAddr) only_badge_owner(_id) when_address_free(_newAddr) public {
-		var oldAddr = badges[_id].addr;
+		address oldAddr = badges[_id].addr;
 		badges[_id].addr = _newAddr;
 		mapFromAddress[oldAddr] = 0;
 		mapFromAddress[_newAddr] = _id;
-		AddressChanged(_id, _newAddr);
+		emit AddressChanged(_id, _newAddr);
 	}
 
 	function setMeta(uint _id, bytes32 _key, bytes32 _value) only_badge_owner(_id) public {
 		badges[_id].meta[_key] = _value;
-		MetaChanged(_id, _key, _value);
+		emit MetaChanged(_id, _key, _value);
 	}
 
 	function drain() only_owner public {
-		msg.sender.transfer(this.balance);
+		//msg.sender.transfer(this.balance);
 	}
 
 	mapping (address => uint) mapFromAddress;
