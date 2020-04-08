@@ -16,7 +16,7 @@
 
 use ethcore::trace;
 use ethcore::trace::trace::{Call, Create};
-use ethcore_bytes::{Bytes, ToPretty};
+use parity_bytes::{Bytes, ToPretty};
 use ethereum_types::{H160, U256};
 use vm;
 

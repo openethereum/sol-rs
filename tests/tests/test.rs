@@ -24,7 +24,7 @@ extern crate rustc_hex;
 extern crate solaris;
 
 use rustc_hex::FromHex;
-use types::{Address, U256};
+use common_types::{Address, U256};
 
 use_contract!(
     get_sender_test,

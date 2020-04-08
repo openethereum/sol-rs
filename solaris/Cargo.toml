@@ -4,12 +4,12 @@ version = "0.1.0"
 authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 
 [dependencies]
-ethabi = { git = "https://github.com/paritytech/ethabi.git" }
-ethcore = { git = "https://github.com/paritytech/parity.git" }
-ethcore-transaction = { git = "https://github.com/paritytech/parity.git" }
-ethcore-bytes = { git = "https://github.com/paritytech/parity.git" }
+ethabi = { git = "https://github.com/openethereum/ethabi.git" }
+ethcore = { git = "https://github.com/openethereum/openethereum.git", branch = "stable"}
+common-types = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+parity-bytes = "0.1"
 ethereum-types = "0.3"
-evm = { git = "https://github.com/paritytech/parity.git" }
+evm = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
 lazy_static = "0.2"
-vm = { git = "https://github.com/paritytech/parity.git" }
-error-chain = "0.11.0"
+vm = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+error-chain = "0.12.0"

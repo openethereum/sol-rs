@@ -16,8 +16,8 @@
 
 extern crate ethabi;
 extern crate ethcore;
-extern crate ethcore_bytes;
-extern crate ethcore_transaction;
+extern crate parity_bytes;
+extern crate common_types;
 extern crate ethereum_types;
 extern crate evm as ethcore_evm;
 extern crate vm;

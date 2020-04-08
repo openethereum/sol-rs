@@ -21,7 +21,7 @@ use ethabi;
 use ethabi::ContractFunction;
 use ethcore;
 use ethcore::client::{EvmTestClient, TransactResult};
-use ethcore_transaction::{Action, SignedTransaction, Transaction};
+use common_types::{Action, SignedTransaction, Transaction};
 use ethereum_types::{Address, H160, H256, U256};
 use std::error::Error;
 use std::fmt;

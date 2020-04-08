@@ -49,7 +49,7 @@ use solaris::convert;
 use solaris::wei;
 
 #[cfg(test)]
-use types::{Address, H256, U256};
+use common_types::{Address, H256, U256};
 
 #[test]
 fn badge_reg_test_fee() {
