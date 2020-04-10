@@ -21,6 +21,8 @@ extern crate common_types;
 extern crate ethereum_types;
 extern crate evm as ethcore_evm;
 extern crate vm;
+extern crate spec;
+extern crate trace as ethcore_trace;
 
 #[macro_use]
 extern crate error_chain;
@@ -40,8 +42,8 @@ pub mod evm;
 pub mod wei;
 
 lazy_static! {
-    pub static ref FOUNDATION: ethcore::spec::Spec =
-        ethcore::ethereum::new_foundation(&::std::env::temp_dir());
+    pub static ref FOUNDATION: spec::Spec =
+        spec::new_foundation(&::std::env::temp_dir());
 }
 
 pub fn main(_json_bytes: &[u8]) {

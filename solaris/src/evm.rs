@@ -18,15 +18,11 @@ use std::sync::Arc;
 
 use error;
 use ethabi;
-use ethabi::ContractFunction;
-use ethcore;
-use ethcore::client::{EvmTestClient, TransactResult};
-use common_types::{Action, SignedTransaction, Transaction};
+use ethabi::Function;
+use ethcore::test_helpers::{EvmTestClient, TransactSuccess};
+use common_types::transaction::{Action, SignedTransaction, Transaction};
 use ethereum_types::{Address, H160, H256, U256};
-use std::error::Error;
-use std::fmt;
 use vm;
-
 use trace;
 
 #[derive(Debug)]
@@ -37,7 +33,7 @@ pub struct Evm {
     value: U256,
     gas: U256,
     gas_price: U256,
-    logs: Vec<ethcore::log_entry::LogEntry>,
+    logs: Vec<common_types::log_entry::LogEntry>,
 }
 
 impl Default for Evm {
@@ -46,82 +42,13 @@ impl Default for Evm {
     }
 }
 
-// temporary workaround for https://github.com/paritytech/parity/issues/8755
-struct TransactSuccess<T, V> {
-    /// State root
-    state_root: H256,
-    /// Amount of gas left
-    gas_left: U256,
-    /// Output
-    output: Vec<u8>,
-    /// Traces
-    trace: Vec<T>,
-    /// VM Traces
-    vm_trace: Option<V>,
-    /// Created contract address (if any)
-    contract_address: Option<H160>,
-    /// Generated logs
-    logs: Vec<ethcore::log_entry::LogEntry>,
-    /// outcome
-    outcome: ethcore::receipt::TransactionOutcome,
-}
-
-// temporary workaround for https://github.com/paritytech/parity/issues/8755
-#[derive(Debug)]
-pub struct TransactError {
-    /// State root
-    state_root: H256,
-    /// Execution error
-    error: ethcore::error::Error,
-}
-
-impl Error for TransactError {
-    fn description(&self) -> &str {
-        "error transacting with the test evm"
-    }
-}
-
-impl fmt::Display for TransactError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-// temporary workaround for https://github.com/paritytech/parity/issues/8755
-fn split_transact_result<T, V>(
-    result: TransactResult<T, V>,
-) -> Result<TransactSuccess<T, V>, TransactError> {
-    match result {
-        TransactResult::Ok {
-            state_root,
-            gas_left,
-            output,
-            trace,
-            vm_trace,
-            contract_address,
-            logs,
-            outcome,
-        } => Ok(TransactSuccess {
-            state_root,
-            gas_left,
-            output,
-            trace,
-            vm_trace,
-            contract_address,
-            logs,
-            outcome,
-        }),
-        TransactResult::Err { state_root, error } => Err(TransactError { state_root, error }),
-    }
-}
-
 pub struct TransactionOutput {
     state_root: H256,
     gas_left: U256,
     output: Vec<u8>,
     contract_address: Option<H160>,
-    logs: Vec<ethcore::log_entry::LogEntry>,
-    outcome: ethcore::receipt::TransactionOutcome,
+    logs: Vec<common_types::log_entry::LogEntry>,
+    outcome: common_types::receipt::TransactionOutcome,
 }
 
 impl<T, V> From<TransactSuccess<T, V>> for TransactionOutput {
@@ -142,7 +69,7 @@ impl Evm {
         let evm = EvmTestClient::new(&*::FOUNDATION).expect("Valid spec given; qed");
         Evm {
             evm,
-            sender: 0.into(),
+            sender: Address::from_low_u64_be(0),
             contract_address: None,
             gas: 4_000_000.into(),
             gas_price: 0.into(),
@@ -157,11 +84,11 @@ impl Evm {
 
     fn env_info(&self) -> vm::EnvInfo {
         vm::EnvInfo {
-            number: 5_000_000u64,
-            author: 0.into(),
+            number: 7_280_000u64,
+            author: Address::from_low_u64_be(0),
             timestamp: 1u64,
             difficulty: 1.into(),
-            last_hashes: Arc::new([0.into(); 256].to_vec()),
+            last_hashes: Arc::new([H256::from_low_u64_be(0); 256].to_vec()),
             gas_used: 0.into(),
             gas_limit: 4_700_000.into(),
         }
@@ -177,7 +104,7 @@ impl Evm {
             action: Action::Create,
             value: self.value,
             data: code.to_vec(),
-        }.fake_sign((&*self.sender).into());
+        }.fake_sign(self.sender);
 
         let transaction_output = self.raw_transact(&env_info, transaction)?;
 
@@ -254,7 +181,7 @@ impl Evm {
         func(self).expect("Unexpected error occured.");
     }
 
-    pub fn call<F: ContractFunction>(&mut self, f: F) -> error::Result<F::Output> {
+    pub fn call(&mut self, encoded_input: ethabi::Bytes) -> error::Result<vm::ReturnData> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let mut params = vm::ActionParams::default();
@@ -263,19 +190,21 @@ impl Evm {
         params.address = contract_address;
         params.code_address = contract_address;
         params.code = self.evm.state().code(&contract_address).expect(STATE);
-        params.data = Some(f.encoded());
-        params.call_type = vm::CallType::Call;
+        params.data = Some(encoded_input);
+        params.action_type = vm::ActionType::Call;
         params.value = vm::ActionValue::Transfer(self.value);
         params.gas = self.gas;
         params.gas_price = self.gas_price;
 
+        let env_info = self.env_info();
         let mut tracers = self.tracers();
-        let result = self.evm.call(params, &mut tracers.0, &mut tracers.1)?;
+        let result = self.evm.call_envinfo(params, &mut tracers.0, &mut tracers.1, env_info)?;
 
-        let output = f.output(result.return_data.to_vec()).expect(
-            "output must be decodable with `ContractFunction` that has encoded input. q.e.d.",
-        );
-        Ok(output)
+        Ok(result.return_data)
+        // let output = f.decode_output(&result.return_data).expect(
+        //     "output must be decodable with `Function` that has encoded input. q.e.d.",
+        // );
+        // Ok(output)
     }
 
     fn raw_transact(
@@ -284,16 +213,14 @@ impl Evm {
         transaction: SignedTransaction,
     ) -> error::Result<TransactionOutput> {
         let mut tracers = self.tracers();
-        let transact_success =
-            split_transact_result(
-                self.evm
-                    .transact(env_info, transaction, tracers.0, tracers.1),
-            )?;
+        let transact_success = self.evm
+            .transact(env_info, transaction, tracers.0, tracers.1)
+            .map_err(|_| "TransactErr occurred".to_string())?;
         self.logs.extend(transact_success.logs.clone());
         Ok(transact_success.into())
     }
 
-    pub fn transact<F: ContractFunction>(&mut self, f: F) -> error::Result<TransactionOutput> {
+    pub fn transact(&mut self, encoded_input: ethabi::Bytes) -> error::Result<TransactionOutput> {
         let contract_address = self.contract_address
             .expect("Contract address is not set. Did you forget to deploy the contract?");
         let env_info = self.env_info();
@@ -304,7 +231,7 @@ impl Evm {
             gas: self.gas,
             action: Action::Call(contract_address),
             value: self.value,
-            data: f.encoded(),
+            data: encoded_input,
         }.fake_sign(self.sender);
 
         self.raw_transact(&env_info, transaction)
@@ -313,9 +240,9 @@ impl Evm {
 
 const STATE: &str = "State failure.";
 
-/// converts an `ethcore::log_entry::LogEntry` to an `ethabi::RawLog`
+/// converts an `common_types::log_entry::LogEntry` to an `ethabi::RawLog`
 /// since the events in a contract derived with `ethabi` can only
 /// be parsed from `ethabi::RawLog` (via `event.parse_log(raw_log)`)
-fn ethcore_log_to_ethabi_log(input: &ethcore::log_entry::LogEntry) -> ethabi::RawLog {
+fn ethcore_log_to_ethabi_log(input: &common_types::log_entry::LogEntry) -> ethabi::RawLog {
     ethabi::RawLog::from((input.topics.clone(), input.data.clone()))
 }

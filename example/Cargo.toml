@@ -8,7 +8,7 @@ ethabi = { git = "https://github.com/openethereum/ethabi.git" }
 ethabi-derive = { git = "https://github.com/openethereum/ethabi.git" }
 ethabi-contract = { git = "https://github.com/openethereum/ethabi.git" }
 solaris = { path = "../solaris", version = "0.1" }
-ethereum-types = "0.3"
+ethereum-types = "0.8.0"
 rustc-hex = "1.0"
 
 [build-dependencies]

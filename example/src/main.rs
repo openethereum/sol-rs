@@ -27,7 +27,7 @@ fn main() {
     solaris::main(include_bytes!("../res/BadgeReg_sol_BadgeReg.abi"));
 }
 
-use_contract!(badgereg, "BadgeReg", "res/BadgeReg_sol_BadgeReg.abi");
+use_contract!(badgereg, "res/BadgeReg_sol_BadgeReg.abi");
 
 #[cfg(test)]
 fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {

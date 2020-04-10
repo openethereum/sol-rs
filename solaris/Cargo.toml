@@ -5,10 +5,12 @@ authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 
 [dependencies]
 ethabi = { git = "https://github.com/openethereum/ethabi.git" }
-ethcore = { git = "https://github.com/openethereum/openethereum.git", branch = "stable"}
+ethcore = { git = "https://github.com/openethereum/openethereum.git", branch = "stable", features = ["test-helpers"]}
 common-types = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+trace = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+spec = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
 parity-bytes = "0.1"
-ethereum-types = "0.3"
+ethereum-types = "0.8.0"
 evm = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
 lazy_static = "0.2"
 vm = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }

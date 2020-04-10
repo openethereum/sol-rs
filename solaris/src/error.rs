@@ -15,8 +15,7 @@
 // along with Parity.  If not, see <http://www.gnu.org/licenses/>.
 
 use ethabi;
-use ethcore::client::EvmTestError;
-use evm;
+use ethcore::test_helpers::EvmTestError;
 
 error_chain! {
     types {
@@ -25,7 +24,6 @@ error_chain! {
 
     foreign_links {
         Ethabi(ethabi::Error);
-        TransactError(evm::TransactError);
     }
 
     errors {
