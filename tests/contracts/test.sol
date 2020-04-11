@@ -16,10 +16,10 @@ contract EventLogTest {
     event Baz();
 
     function emitFoo() public {
-        Foo(msg.sender);
+        emit Foo(msg.sender);
     }
 
     function emitBar(uint value) public {
-        Bar(value);
+        emit Bar(value);
     }
 }

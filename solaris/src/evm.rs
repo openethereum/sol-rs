@@ -161,7 +161,7 @@ impl Evm {
 
     /// returns a vector of all logs that were collected for a specific `event`.
     /// the logs are conveniently converted to the events log struct `T::Log`.
-    pub fn logs_for_event<T: ethabi::ParseLog>(&self, event: T) -> Vec<T::Log> {
+    pub fn logs_for_event(&self, event: ethabi::Event) -> Vec<ethabi::Log> {
         self.logs
             .iter()
             .filter_map(|log| event.parse_log(ethcore_log_to_ethabi_log(log)).ok())
