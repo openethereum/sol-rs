@@ -18,7 +18,6 @@ use std::sync::Arc;
 
 use error;
 use ethabi;
-use ethabi::Function;
 use ethcore::test_helpers::{EvmTestClient, TransactSuccess};
 use common_types::transaction::{Action, SignedTransaction, Transaction};
 use ethereum_types::{Address, H160, H256, U256};
@@ -201,10 +200,6 @@ impl Evm {
         let result = self.evm.call_envinfo(params, &mut tracers.0, &mut tracers.1, env_info)?;
 
         Ok(result.return_data)
-        // let output = f.decode_output(&result.return_data).expect(
-        //     "output must be decodable with `Function` that has encoded input. q.e.d.",
-        // );
-        // Ok(output)
     }
 
     fn raw_transact(

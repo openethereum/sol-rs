@@ -17,7 +17,6 @@
 extern crate ethabi;
 #[macro_use]
 extern crate ethabi_contract;
-#[macro_use]
 extern crate ethabi_derive;
 extern crate ethereum_types;
 extern crate rustc_hex;
@@ -25,7 +24,6 @@ extern crate solaris;
 
 use rustc_hex::FromHex;
 use ethereum_types::{Address, U256};
-use ethabi::Token;
 
 use_contract!(
     get_sender_test,

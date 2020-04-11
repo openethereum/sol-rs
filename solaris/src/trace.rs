@@ -75,7 +75,7 @@ impl PrintingTracer {
 impl ethcore_trace::Tracer for PrintingTracer {
     type Output = ();
 
-    fn prepare_trace_call(&mut self, params: &ActionParams, depth: usize, is_builtin: bool) {
+    fn prepare_trace_call(&mut self, params: &ActionParams, depth: usize, _is_builtin: bool) {
         println!(
             "{d}CALL ({from} --{value:?}--> {to}), data: {data}",
             d = depth,
@@ -96,11 +96,11 @@ impl ethcore_trace::Tracer for PrintingTracer {
         );
     }
 
-    fn done_trace_call(&mut self, gas_used: U256, output: &[u8]) {
+    fn done_trace_call(&mut self, _gas_used: U256, output: &[u8]) {
         println!("DONE TRACE CALL Output: {:?}", output);
     }
 
-	fn done_trace_create(&mut self, gas_used: U256, code: &[u8], address: Address) {
+	fn done_trace_create(&mut self, _gas_used: U256, _code: &[u8], address: Address) {
         println!("DONE TRACE CREATE At: {}", address);
     }
 
@@ -120,7 +120,7 @@ impl ethcore_trace::Tracer for PrintingTracer {
 impl ethcore_trace::VMTracer for PrintingTracer {
     type Output = ();
 
-    fn trace_next_instruction(&mut self, pc: usize, instruction: u8, current_gas: U256) -> bool {
+    fn trace_next_instruction(&mut self, pc: usize, instruction: u8, _current_gas: U256) -> bool {
         self.pc = pc;
         self.instruction = instruction;
         true
@@ -165,7 +165,7 @@ impl ethcore_trace::VMTracer for PrintingTracer {
 
     fn done_subtrace(&mut self) {}
 
-    fn drain(mut self) -> Option<Self::Output> {
+    fn drain(self) -> Option<Self::Output> {
         None
     }
 }

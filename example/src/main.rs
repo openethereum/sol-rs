@@ -17,7 +17,6 @@
 extern crate ethabi;
 #[macro_use]
 extern crate ethabi_contract;
-#[macro_use]
 extern crate ethabi_derive;
 extern crate ethereum_types;
 extern crate rustc_hex;
@@ -48,7 +47,7 @@ use solaris::convert;
 use solaris::wei;
 
 #[cfg(test)]
-use ethereum_types::{Address, H256, U256};
+use ethereum_types::{Address, U256};
 
 #[test]
 fn badge_reg_test_fee() {
