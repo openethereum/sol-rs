@@ -19,7 +19,7 @@ extern crate ethabi;
 extern crate ethabi_contract;
 #[macro_use]
 extern crate ethabi_derive;
-extern crate ethereum_types as types;
+extern crate ethereum_types;
 extern crate rustc_hex;
 extern crate solaris;
 
@@ -30,15 +30,14 @@ fn main() {
 use_contract!(badgereg, "res/BadgeReg_sol_BadgeReg.abi");
 
 #[cfg(test)]
-fn setup() -> (solaris::evm::Evm, badgereg::BadgeReg) {
-    let contract = badgereg::BadgeReg::default();
+fn setup() -> solaris::evm::Evm {
     let code = include_str!("../res/BadgeReg_sol_BadgeReg.bin");
     let mut evm = solaris::evm();
 
-    let owner = 3.into();
+    let owner = Address::from_low_u64_be(3);
     let _address = evm.with_sender(owner).deploy(&code.from_hex().unwrap());
 
-    (evm, contract)
+    evm
 }
 
 #[cfg(test)]
@@ -49,66 +48,82 @@ use solaris::convert;
 use solaris::wei;
 
 #[cfg(test)]
-use common_types::{Address, H256, U256};
+use ethereum_types::{Address, H256, U256};
 
 #[test]
 fn badge_reg_test_fee() {
-    let (mut evm, contract) = setup();
+    let mut evm = setup();
 
+    use badgereg::functions;
+
+    let result_data = evm.call(functions::fee::encode_input()).unwrap();
     // Initial fee is 1 ETH
     assert_eq!(
-        evm.call(contract.functions().fee()).unwrap(),
+        functions::fee::decode_output(&result_data).unwrap(),
         wei::from_ether(1)
     );
 
     // The owner should be able to set the fee
-    evm.call(contract.functions().set_fee(wei::from_gwei(10)))
-        .unwrap();
-
+    evm.transact(functions::set_fee::encode_input(wei::from_gwei(10))).unwrap();
+    
+    let result_data = evm.call(functions::fee::encode_input()).unwrap();
     // Fee should be updated
     assert_eq!(
-        evm.call(contract.functions().fee()).unwrap(),
+        functions::fee::decode_output(&result_data).unwrap(),
         wei::from_gwei(10)
     );
 
     // Other address should not be allowed to change the fee
-    evm.with_sender(10.into())
-        .transact(contract.functions().set_fee(wei::from_gwei(10)))
+    evm.with_sender(Address::from_low_u64_be(10))
+        .transact(functions::set_fee::encode_input(wei::from_gwei(15)))
         .unwrap();
+
+    let result_data = evm.call(functions::fee::encode_input()).unwrap();
+    // Fee should not be updated
+    assert_eq!(
+        functions::fee::decode_output(&result_data).unwrap(),
+        wei::from_gwei(10)
+    );
 }
 
 #[test]
 fn anyone_should_be_able_to_register_a_badge() {
-    let (mut evm, contract) = setup();
+    let mut evm = setup();
+
+    use badgereg::functions;
 
     evm.with_value(wei::from_ether(2))
-        .with_sender(5.into())
+        .with_sender(Address::from_low_u64_be(5))
         .ensure_funds()
         .transact(
-            contract
-                .functions()
-                .register(Address::from(10), convert::bytes32("test")),
+            functions::register::encode_input(Address::from_low_u64_be(10), convert::bytes32("test")),
         )
         .unwrap();
 
+    use badgereg::events;
+
+    let registerd_logs: Vec<badgereg::logs::Registered> = evm.raw_logs()
+        .iter()
+        .filter_map(|log| events::registered::parse_log(log.clone()).ok())
+        .collect();
+
     assert_eq!(
-        evm.logs_for_event(badgereg::events::Registered::default())
-            .len(),
+        registerd_logs.len(),
         1
     );
 
     // TODO [ToDr] Perhaps `with_` should not be persistent?
-    let output = evm.with_value(0.into())
-        .call(contract.functions().from_name(convert::bytes32("test")))
+    let result_data = evm.with_value(0.into())
+        .call(functions::from_name::encode_input(convert::bytes32("test")))
         .unwrap();
 
     // Test that it was registered correctly
     assert_eq!(
-        output,
+        functions::from_name::decode_output(&result_data).unwrap(),
         (
             U256::from(0).into(),
-            Address::from(10).into(),
-            Address::from(5).into()
+            Address::from_low_u64_be(10).into(),
+            Address::from_low_u64_be(5).into()
         )
     );
 }
