@@ -89,7 +89,7 @@ contract BadgeReg is Owned {
 	}
 
 	function drain() only_owner public {
-		//msg.sender.transfer(this.balance);
+		msg.sender.transfer(address(this).balance);
 	}
 
 	mapping (address => uint) mapFromAddress;

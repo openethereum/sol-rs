@@ -44,11 +44,11 @@ pub fn compile<T: AsRef<Path>>(path: T) {
         // Output contract binary
 		.arg("--bin")
         // Output contract abi
-		.arg("--abi");
+		.arg("--abi")
         // Overwrite existing output files (*.abi, *.bin, etc.)
-		//.arg("--overwrite")
+		.arg("--overwrite")
         // Compile optimized evm-bytecode
-        //.arg("--optimize");
+        .arg("--optimize");
 
     for file in sol_files(&path).expect("Contracts directory is not readable.") {
         command.arg(file);
