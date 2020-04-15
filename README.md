@@ -58,3 +58,7 @@ Solidity Smart Contracts unit test harness written in Rust using the native Pari
   - Rustc 1.41.0 (5e1a79984 2020-01-27)
   - Solidity 0.5.17+commit.d19bba13.Emscripten.clang
   - OpenEthereum EVM [stable](https://github.com/openethereum/openethereum/tree/41aee5aa2f257b99c922a0324c969493f69e71c5)
+
+## Known Issue
+
+- https://github.com/openethereum/openethereum/issues/11631
