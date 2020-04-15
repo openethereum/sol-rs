@@ -4,14 +4,14 @@ version = "0.1.0"
 authors = ["Tomasz Drwięga <tomusdrw@gmail.com>"]
 
 [dependencies]
-ethabi = { git = "https://github.com/openethereum/ethabi.git" }
-ethcore = { git = "https://github.com/openethereum/openethereum.git", branch = "stable", features = ["test-helpers"]}
-common-types = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
-trace = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
-spec = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+ethabi = "12.0.0"
+ethcore = { git = "https://github.com/openethereum/openethereum.git", branch = "master", features = ["test-helpers"]}
+common-types = { git = "https://github.com/openethereum/openethereum.git", branch = "master" }
+trace = { git = "https://github.com/openethereum/openethereum.git", branch = "master" }
+spec = { git = "https://github.com/openethereum/openethereum.git", branch = "master" }
 parity-bytes = "0.1"
-ethereum-types = "0.8.0"
-evm = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+ethereum-types = "0.9.0"
+evm = { git = "https://github.com/openethereum/openethereum.git", branch = "master" }
 lazy_static = "0.2"
-vm = { git = "https://github.com/openethereum/openethereum.git", branch = "stable" }
+vm = { git = "https://github.com/openethereum/openethereum.git", branch = "master" }
 error-chain = "0.12.0"
