@@ -27,12 +27,12 @@ use ethereum_types::{Address, U256};
 
 use_contract!(
     get_sender_test,
-    "contracts/test_sol_GetSenderTest.abi"
+    "contracts/GetSenderTest.abi"
 );
 
 use_contract!(
     event_log_test,
-    "contracts/test_sol_EventLogTest.abi"
+    "contracts/EventLogTest.abi"
 );
 
 #[test]
@@ -41,7 +41,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 
     let contract_owner_address: Address = Address::from_low_u64_be(3);
 
-    let code_hex = include_str!("../contracts/test_sol_GetSenderTest.bin");
+    let code_hex = include_str!("../contracts/GetSenderTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
@@ -63,7 +63,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
 
 use_contract!(
     get_value_test,
-    "contracts/test_sol_GetValueTest.abi"
+    "contracts/GetValueTest.abi"
 );
 
 #[test]
@@ -72,7 +72,7 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
     let contract_owner_address: Address = Address::from_low_u64_be(3);
 
-    let code_hex = include_str!("../contracts/test_sol_GetValueTest.bin");
+    let code_hex = include_str!("../contracts/GetValueTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
@@ -95,7 +95,7 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
 #[test]
 fn logs_should_get_collected_and_retrieved_correctly() {
-    let code_hex = include_str!("../contracts/test_sol_EventLogTest.bin");
+    let code_hex = include_str!("../contracts/EventLogTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
 
     let mut evm = solaris::evm();

@@ -23,14 +23,14 @@ extern crate rustc_hex;
 extern crate solaris;
 
 fn main() {
-    solaris::main(include_bytes!("../res/BadgeReg_sol_BadgeReg.abi"));
+    solaris::main(include_bytes!("../res/BadgeReg.abi"));
 }
 
-use_contract!(badgereg, "res/BadgeReg_sol_BadgeReg.abi");
+use_contract!(badgereg, "res/BadgeReg.abi");
 
 #[cfg(test)]
 fn setup() -> solaris::evm::Evm {
-    let code = include_str!("../res/BadgeReg_sol_BadgeReg.bin");
+    let code = include_str!("../res/BadgeReg.bin");
     let mut evm = solaris::evm();
 
     let owner = Address::from_low_u64_be(3);
