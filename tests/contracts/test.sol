@@ -1,5 +1,11 @@
 pragma solidity ^0.5.17;
 
+library TestLibrary {
+    function getValue() public returns(uint) {
+        return 300;
+    }
+}
+
 contract GetSenderTest {
     function getSender() public returns(address) {
         return msg.sender;
@@ -35,5 +41,11 @@ contract EventLogTest {
 
     function emitBar(uint value) public {
         emit Bar(value);
+    }
+}
+
+contract LibraryTest {
+    function getValueFromLibrary() public returns(uint) {
+        return TestLibrary.getValue();
     }
 }

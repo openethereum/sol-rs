@@ -21,7 +21,9 @@ extern crate ethabi_derive;
 extern crate ethereum_types;
 extern crate rustc_hex;
 extern crate solaris;
+extern crate solc;
 
+use std::fs;
 use rustc_hex::FromHex;
 use ethereum_types::{Address, U256};
 
@@ -38,6 +40,11 @@ use_contract!(
 use_contract!(
     constructor_test,
     "contracts/ConstructorTest.abi"
+);
+
+use_contract!(
+    library_test,
+    "contracts/LibraryTest.abi"
 );
 
 #[test]
@@ -186,4 +193,44 @@ fn value_should_match_value_passed_into_constructor() {
         .unwrap();
 
     assert_eq!(output, U256::from(100));
+}
+
+#[test]
+fn deploy_contract_with_linking_library_should_succeed() {
+    let mut evm = solaris::evm();
+
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
+
+    // deploy TestLibrary
+    let code_hex = include_str!("../contracts/TestLibrary.bin");
+    let code_bytes = code_hex.from_hex().unwrap();
+    let library_address = evm.with_sender(contract_owner_address)
+        .deploy(&code_bytes)
+        .expect("library deployment should succeed");
+
+    // link to deployed library
+    solc::link(
+        vec![format!("test.sol:TestLibrary:{:x}", library_address)],
+        "LibraryTest.bin".into(),
+        concat!(env!("CARGO_MANIFEST_DIR"), "/contracts/"));
+
+    // deploy LibraryTest
+    // can't use include_str because the bytecode is updated linking to library
+    let code_hex = fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/contracts/LibraryTest.bin")).unwrap();
+    let code_bytes = code_hex.from_hex().unwrap();
+    let _contract_address = evm.with_sender(contract_owner_address)
+        .deploy(&code_bytes)
+        .expect("contract deployment should succeed");
+
+    use library_test::functions;
+
+    let result_data = evm
+        .ensure_funds()
+        .call(functions::get_value_from_library::encode_input())
+        .unwrap();
+    
+    let output: U256 = functions::get_value_from_library::decode_output(&result_data)
+        .unwrap();
+
+    assert_eq!(output, U256::from(300));
 }
