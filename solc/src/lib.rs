@@ -70,6 +70,32 @@ pub fn compile<T: AsRef<Path>>(path: T) {
     );
 }
 
+/// Link libraries to given bytecode.
+pub fn link<T: AsRef<Path>>(libraries: Vec<String>, target: String, path: T) {
+    let mut command = platform::solc();
+    command
+        // Link mode
+        .arg("--link");
+
+    for library in libraries {
+        command
+            .arg("--libraries")
+            .arg(library);
+    }
+
+    command.arg(target);
+
+    let child = command
+        .current_dir(path)
+        .status()
+        .unwrap_or_else(|e| panic!("Error linking solidity contracts: {}", e));
+
+    assert!(
+        child.success(),
+        "There was an error while linking contracts code."
+    );
+}
+
 fn sol_files<T: AsRef<Path>>(path: T) -> io::Result<Vec<String>> {
     let mut sol_files = Vec::new();
 
