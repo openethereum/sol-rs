@@ -35,6 +35,11 @@ use_contract!(
     "contracts/EventLogTest.abi"
 );
 
+use_contract!(
+    constructor_test,
+    "contracts/ConstructorTest.abi"
+);
+
 #[test]
 fn msg_sender_should_match_value_passed_into_with_sender() {
     let mut evm = solaris::evm();
@@ -155,4 +160,30 @@ fn logs_should_get_collected_and_retrieved_correctly() {
         .collect();
 
     assert_eq!(baz_logs.len(), 0);
+}
+
+#[test]
+fn value_should_match_value_passed_into_constructor() {
+    let mut evm = solaris::evm();
+
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
+
+    let code_hex = include_str!("../contracts/ConstructorTest.bin");
+    let code_bytes = code_hex.from_hex().unwrap();
+    let constructor_bytes = constructor_test::constructor(code_bytes, 100);
+    let _contract_address = evm.with_sender(contract_owner_address)
+        .deploy(&constructor_bytes)
+        .expect("contract deployment should succeed");
+
+    use constructor_test::functions;
+
+    let result_data = evm
+        .ensure_funds()
+        .call(functions::get_value::encode_input())
+        .unwrap();
+    
+    let output: U256 = functions::get_value::decode_output(&result_data)
+        .unwrap();
+
+    assert_eq!(output, U256::from(100));
 }

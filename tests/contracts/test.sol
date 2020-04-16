@@ -1,3 +1,5 @@
+pragma solidity ^0.5.17;
+
 contract GetSenderTest {
     function getSender() public returns(address) {
         return msg.sender;
@@ -5,8 +7,20 @@ contract GetSenderTest {
 }
 
 contract GetValueTest {
-    function getValue() payable public returns(uint) {
+    function getValue() public payable returns(uint) {
         return msg.value;
+    }
+}
+
+contract ConstructorTest {
+    uint public value = 0;
+
+    constructor(uint _value) public {
+        value = _value;
+    }
+
+    function getValue() public returns(uint) {
+        return value;
     }
 }
 
