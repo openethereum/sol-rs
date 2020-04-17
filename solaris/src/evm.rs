@@ -180,9 +180,13 @@ impl Evm {
         func(self).expect("Unexpected error occured.");
     }
 
-    pub fn call(&mut self, encoded_input: ethabi::Bytes) -> error::Result<vm::ReturnData> {
-        let contract_address = self.contract_address
-            .expect("Contract address is not set. Did you forget to deploy the contract?");
+    pub fn call(&mut self, encoded_input: ethabi::Bytes, address: Option<Address>) -> error::Result<vm::ReturnData> {
+        let contract_address = match address {
+            Some(s) => s,
+            None => self.contract_address
+                .expect("Contract address is not set. Did you forget to deploy the contract?")
+        };
+        
         let mut params = vm::ActionParams::default();
         params.sender = self.sender;
         params.origin = self.sender;
@@ -215,9 +219,12 @@ impl Evm {
         Ok(transact_success.into())
     }
 
-    pub fn transact(&mut self, encoded_input: ethabi::Bytes) -> error::Result<TransactionOutput> {
-        let contract_address = self.contract_address
-            .expect("Contract address is not set. Did you forget to deploy the contract?");
+    pub fn transact(&mut self, encoded_input: ethabi::Bytes, address: Option<Address>) -> error::Result<TransactionOutput> {
+        let contract_address = match address {
+            Some(s) => s,
+            None => self.contract_address
+                .expect("Contract address is not set. Did you forget to deploy the contract?")
+        };
         let env_info = self.env_info();
         let nonce = self.evm.state().nonce(&self.sender).expect(STATE);
         let transaction = Transaction {

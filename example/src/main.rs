@@ -55,7 +55,7 @@ fn badge_reg_test_fee() {
 
     use badgereg::functions;
 
-    let result_data = evm.call(functions::fee::encode_input()).unwrap();
+    let result_data = evm.call(functions::fee::encode_input(), None).unwrap();
     // Initial fee is 1 ETH
     assert_eq!(
         functions::fee::decode_output(&result_data).unwrap(),
@@ -63,9 +63,9 @@ fn badge_reg_test_fee() {
     );
 
     // The owner should be able to set the fee
-    evm.transact(functions::set_fee::encode_input(wei::from_gwei(10))).unwrap();
+    evm.transact(functions::set_fee::encode_input(wei::from_gwei(10)), None).unwrap();
     
-    let result_data = evm.call(functions::fee::encode_input()).unwrap();
+    let result_data = evm.call(functions::fee::encode_input(), None).unwrap();
     // Fee should be updated
     assert_eq!(
         functions::fee::decode_output(&result_data).unwrap(),
@@ -74,10 +74,10 @@ fn badge_reg_test_fee() {
 
     // Other address should not be allowed to change the fee
     evm.with_sender(Address::from_low_u64_be(10))
-        .transact(functions::set_fee::encode_input(wei::from_gwei(15)))
+        .transact(functions::set_fee::encode_input(wei::from_gwei(15)), None)
         .unwrap();
 
-    let result_data = evm.call(functions::fee::encode_input()).unwrap();
+    let result_data = evm.call(functions::fee::encode_input(), None).unwrap();
     // Fee should not be updated
     assert_eq!(
         functions::fee::decode_output(&result_data).unwrap(),
@@ -96,6 +96,7 @@ fn anyone_should_be_able_to_register_a_badge() {
         .ensure_funds()
         .transact(
             functions::register::encode_input(Address::from_low_u64_be(10), convert::bytes32("test")),
+            None
         )
         .unwrap();
 
@@ -113,7 +114,7 @@ fn anyone_should_be_able_to_register_a_badge() {
 
     // TODO [ToDr] Perhaps `with_` should not be persistent?
     let result_data = evm.with_value(0.into())
-        .call(functions::from_name::encode_input(convert::bytes32("test")))
+        .call(functions::from_name::encode_input(convert::bytes32("test")), None)
         .unwrap();
 
     // Test that it was registered correctly

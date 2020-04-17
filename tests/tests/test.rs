@@ -64,7 +64,7 @@ fn msg_sender_should_match_value_passed_into_with_sender() {
     let sender = Address::from_low_u64_be(5);
 
     let result_data = evm.with_sender(sender)
-        .call(functions::get_sender::encode_input())
+        .call(functions::get_sender::encode_input(), None)
         .unwrap();
 
     let output: Address = functions::get_sender::decode_output(&result_data)
@@ -96,7 +96,7 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
     let result_data = evm.with_value(value)
         .ensure_funds()
-        .call(functions::get_value::encode_input())
+        .call(functions::get_value::encode_input(), None)
         .unwrap();
     
     let output: U256 = functions::get_value::decode_output(&result_data)
@@ -122,20 +122,20 @@ fn logs_should_get_collected_and_retrieved_correctly() {
 
     let first_sender_address = Address::from_low_u64_be(10);
     evm.with_sender(first_sender_address)
-        .transact(functions::emit_foo::encode_input())
+        .transact(functions::emit_foo::encode_input(), None)
         .unwrap();
 
     let second_sender_address = Address::from_low_u64_be(11);
     evm.with_sender(second_sender_address)
-        .transact(functions::emit_foo::encode_input())
+        .transact(functions::emit_foo::encode_input(), None)
         .unwrap();
 
-    evm.transact(functions::emit_bar::encode_input(100)).unwrap();
-    evm.transact(functions::emit_bar::encode_input(101)).unwrap();
-    evm.transact(functions::emit_bar::encode_input(102)).unwrap();
+    evm.transact(functions::emit_bar::encode_input(100), None).unwrap();
+    evm.transact(functions::emit_bar::encode_input(101), None).unwrap();
+    evm.transact(functions::emit_bar::encode_input(102), None).unwrap();
 
     // call should not show up in logs
-    evm.call(functions::emit_foo::encode_input())
+    evm.call(functions::emit_foo::encode_input(), None)
         .unwrap();
 
     assert_eq!(evm.raw_logs().len(), 5);
@@ -186,7 +186,7 @@ fn value_should_match_value_passed_into_constructor() {
 
     let result_data = evm
         .ensure_funds()
-        .call(functions::get_value::encode_input())
+        .call(functions::get_value::encode_input(), None)
         .unwrap();
     
     let output: U256 = functions::get_value::decode_output(&result_data)
@@ -226,7 +226,7 @@ fn deploy_contract_with_linking_library_should_succeed() {
 
     let result_data = evm
         .ensure_funds()
-        .call(functions::get_value_from_library::encode_input())
+        .call(functions::get_value_from_library::encode_input(), None)
         .unwrap();
     
     let output: U256 = functions::get_value_from_library::decode_output(&result_data)
