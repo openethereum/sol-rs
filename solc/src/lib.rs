@@ -36,6 +36,7 @@ mod platform {
 
 use std::path::Path;
 use std::{fs, io};
+use std::process::Stdio;
 
 /// Compiles all solidity files in given directory.
 pub fn compile<T: AsRef<Path>>(path: T) {
@@ -86,6 +87,8 @@ pub fn link<T: AsRef<Path>>(libraries: Vec<String>, target: String, path: T) {
     command.arg(target);
 
     let child = command
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .current_dir(path)
         .status()
         .unwrap_or_else(|e| panic!("Error linking solidity contracts: {}", e));
