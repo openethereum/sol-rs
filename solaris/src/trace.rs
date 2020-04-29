@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity.  If not, see <http://www.gnu.org/licenses/>.
 
-use ethcore::trace;
-use ethcore::trace::trace::{Call, Create};
-use ethcore_bytes::{Bytes, ToPretty};
-use ethereum_types::{H160, U256};
+use ethcore_trace;
+use parity_bytes::{Bytes, ToPretty};
+use ethereum_types::{Address, H160, U256};
 use vm;
+use vm::{Error as VmError, ActionParams};
 
 #[derive(Debug)]
 pub struct PrintingTracer {
@@ -72,22 +72,21 @@ impl PrintingTracer {
     }
 }
 
-impl trace::Tracer for PrintingTracer {
+impl ethcore_trace::Tracer for PrintingTracer {
     type Output = ();
 
-    fn prepare_trace_call(&self, params: &vm::ActionParams) -> Option<Call> {
+    fn prepare_trace_call(&mut self, params: &ActionParams, depth: usize, _is_builtin: bool) {
         println!(
             "{d}CALL ({from} --{value:?}--> {to}), data: {data}",
-            d = self.depth(),
+            d = depth,
             from = params.sender,
             value = params.value,
             to = params.address,
             data = bytes_as_str(&params.data),
         );
-        None
     }
 
-    fn prepare_trace_create(&self, params: &vm::ActionParams) -> Option<Create> {
+    fn prepare_trace_create(&mut self, params: &vm::ActionParams) {
         println!(
             "{d}CREATE ({from} --{value:?}--> NEW), data: {data}",
             d = self.depth(),
@@ -95,76 +94,33 @@ impl trace::Tracer for PrintingTracer {
             value = params.value,
             data = bytes_as_str(&params.data),
         );
-        None
     }
 
-    fn prepare_trace_output(&self) -> Option<Bytes> {
-        None
+    fn done_trace_call(&mut self, _gas_used: U256, output: &[u8]) {
+        println!("DONE TRACE CALL Output: {:?}", output);
     }
 
-    fn trace_call(
-        &mut self,
-        _call: Option<Call>,
-        _gas_used: U256,
-        output: Option<Bytes>,
-        _subs: Vec<Self::Output>,
-    ) {
-        println!("{}<--Output: {} ", self.depth(), bytes_as_str(&output));
+	fn done_trace_create(&mut self, _gas_used: U256, _code: &[u8], address: Address) {
+        println!("DONE TRACE CREATE At: {}", address);
     }
 
-    /// Stores trace create info.
-    fn trace_create(
-        &mut self,
-        _create: Option<Create>,
-        _gas_used: U256,
-        _code: Option<Bytes>,
-        address: H160,
-        _subs: Vec<Self::Output>,
-    ) {
-        println!("{}<--At: {}", self.depth(), address);
-    }
-
-    fn trace_failed_call(
-        &mut self,
-        _call: Option<Call>,
-        _subs: Vec<Self::Output>,
-        error: trace::TraceError,
-    ) {
-        println!("{}CALL FAILED: {:?}", self.depth(), error);
-    }
-
-    fn trace_failed_create(
-        &mut self,
-        _create: Option<Create>,
-        _subs: Vec<Self::Output>,
-        error: trace::TraceError,
-    ) {
-        println!("{}CREATE FAILED: {:?}", self.depth(), error);
+	fn done_trace_failed(&mut self, error: &VmError) {
+        println!("DONE TRACE FAILED: {}", error);
     }
 
     fn trace_suicide(&mut self, _address: H160, _balance: U256, _refund_address: H160) {}
 
-    fn trace_reward(&mut self, _author: H160, _value: U256, _reward_type: trace::RewardType) {}
-
-    fn subtracer(&self) -> Self
-    where
-        Self: Sized,
-    {
-        let mut vm = PrintingTracer::default();
-        vm.vm_enabled = self.vm_enabled;
-        vm.depth = self.depth + 1;
-        vm
-    }
+    fn trace_reward(&mut self, _author: H160, _value: U256, _reward_type: ethcore_trace::RewardType) {}
 
     fn drain(self) -> Vec<Self::Output> {
         vec![]
     }
 }
 
-impl trace::VMTracer for PrintingTracer {
+impl ethcore_trace::VMTracer for PrintingTracer {
     type Output = ();
 
-    fn trace_next_instruction(&mut self, pc: usize, instruction: u8, current_gas: U256) -> bool {
+    fn trace_next_instruction(&mut self, pc: usize, instruction: u8, _current_gas: U256) -> bool {
         self.pc = pc;
         self.instruction = instruction;
         true
@@ -174,42 +130,40 @@ impl trace::VMTracer for PrintingTracer {
         &mut self,
         gas_used: U256,
         stack_push: &[U256],
-        _mem_diff: Option<(usize, &[u8])>,
-        _store_diff: Option<(U256, U256)>,
+        _mem: &[u8],
     ) {
         if !self.vm_enabled {
             return;
         }
 
-        let info = ::ethcore_evm::INSTRUCTIONS[self.instruction as usize];
+        if let Some(instruction) = ::ethcore_evm::Instruction::from_u8(self.instruction) {
 
-        let len = self.stack.len();
-        self.stack
-            .truncate(if len > info.args { len - info.args } else { 0 });
-        self.stack.extend_from_slice(stack_push);
+            let info = instruction.info();
 
-        println!(
-            "{}[{}] {}({:x}) stack_after: {}, gas_left: {}",
-            self.depth(),
-            self.pc,
-            info.name,
-            self.instruction,
-            self.stack(),
-            gas_used,
-        );
+            let len = self.stack.len();
+            self.stack
+                .truncate(if len > info.args { len - info.args } else { 0 });
+            self.stack.extend_from_slice(stack_push);
+    
+            println!(
+                "{}[{}] {}({:x}) stack_after: {}, gas_left: {}",
+                self.depth(),
+                self.pc,
+                info.name,
+                self.instruction,
+                self.stack(),
+                gas_used,
+            );
+        }
     }
 
-    fn prepare_subtrace(&self, _code: &[u8]) -> Self
-    where
-        Self: Sized,
-    {
+    fn prepare_subtrace(&mut self, _code: &[u8]) {
         let mut vm = PrintingTracer::default();
         vm.vm_enabled = self.vm_enabled;
         vm.depth = self.depth + 1;
-        vm
     }
 
-    fn done_subtrace(&mut self, _sub: Self) {}
+    fn done_subtrace(&mut self) {}
 
     fn drain(self) -> Option<Self::Output> {
         None

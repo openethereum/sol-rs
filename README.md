@@ -50,4 +50,15 @@ Solidity Smart Contracts unit test harness written in Rust using the native Pari
 + Differences in EVM implementations
   - Subtle differences in various EVM implementations _*may*_ lead to different behavior (which would lead to consensus bugs)
   - Validating Parity's EVM interpreter implementation is a separate and important project
-  - Other tools, like Hive and KEVM are better suited for benchmarking/testing EVM implementations 
+  - Other tools, like Hive and KEVM are better suited for benchmarking/testing EVM implementations
+
+## Tools compatibility
+
++ Solaris can be built and has been tested with the following tools
+  - Rustc 1.41.0 (5e1a79984 2020-01-27)
+  - Solidity 0.5.17+commit.d19bba13.Emscripten.clang
+  - OpenEthereum EVM rev: 4b5e9ddfa66e0e5082281034b148546278c2a315
+
+## Known Issue
+
+- https://github.com/openethereum/openethereum/issues/11631

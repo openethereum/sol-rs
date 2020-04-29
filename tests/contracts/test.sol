@@ -1,3 +1,11 @@
+pragma solidity ^0.5.17;
+
+library TestLibrary {
+    function getValue() public returns(uint) {
+        return 300;
+    }
+}
+
 contract GetSenderTest {
     function getSender() public returns(address) {
         return msg.sender;
@@ -5,8 +13,20 @@ contract GetSenderTest {
 }
 
 contract GetValueTest {
-    function getValue() payable public returns(uint) {
+    function getValue() public payable returns(uint) {
         return msg.value;
+    }
+}
+
+contract ConstructorTest {
+    uint public value = 0;
+
+    constructor(uint _value) public {
+        value = _value;
+    }
+
+    function getValue() public returns(uint) {
+        return value;
     }
 }
 
@@ -16,10 +36,16 @@ contract EventLogTest {
     event Baz();
 
     function emitFoo() public {
-        Foo(msg.sender);
+        emit Foo(msg.sender);
     }
 
     function emitBar(uint value) public {
-        Bar(value);
+        emit Bar(value);
+    }
+}
+
+contract LibraryTest {
+    function getValueFromLibrary() public returns(uint) {
+        return TestLibrary.getValue();
     }
 }

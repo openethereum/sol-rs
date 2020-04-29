@@ -17,75 +17,89 @@
 extern crate ethabi;
 #[macro_use]
 extern crate ethabi_contract;
-#[macro_use]
 extern crate ethabi_derive;
-extern crate ethereum_types as types;
+extern crate ethereum_types;
 extern crate rustc_hex;
 extern crate solaris;
+extern crate solc;
 
+use std::fs;
 use rustc_hex::FromHex;
-use types::{Address, U256};
+use ethereum_types::{Address, U256};
 
 use_contract!(
     get_sender_test,
-    "GetSenderTest",
-    "contracts/test_sol_GetSenderTest.abi"
+    "contracts/GetSenderTest.abi"
 );
 
 use_contract!(
     event_log_test,
-    "EventLogTest",
-    "contracts/test_sol_EventLogTest.abi"
+    "contracts/EventLogTest.abi"
+);
+
+use_contract!(
+    constructor_test,
+    "contracts/ConstructorTest.abi"
+);
+
+use_contract!(
+    library_test,
+    "contracts/LibraryTest.abi"
 );
 
 #[test]
 fn msg_sender_should_match_value_passed_into_with_sender() {
     let mut evm = solaris::evm();
 
-    let contract_owner_address: Address = 3.into();
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
 
-    let code_hex = include_str!("../contracts/test_sol_GetSenderTest.bin");
+    let code_hex = include_str!("../contracts/GetSenderTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
         .expect("contract deployment should succeed");
 
-    let contract = get_sender_test::GetSenderTest::default();
+    use get_sender_test::functions;
 
-    let sender = 5.into();
+    let sender = Address::from_low_u64_be(5);
 
-    let output: Address = evm.with_sender(sender)
-        .call(contract.functions().get_sender())
+    let result_data = evm.with_sender(sender)
+        .call(functions::get_sender::encode_input(), None)
         .unwrap();
 
+    let output: Address = functions::get_sender::decode_output(&result_data)
+        .unwrap();
+            
     assert_eq!(output, sender);
 }
 
 use_contract!(
     get_value_test,
-    "GetValueTest",
-    "contracts/test_sol_GetValueTest.abi"
+    "contracts/GetValueTest.abi"
 );
 
 #[test]
 fn msg_value_should_match_value_passed_into_with_value() {
     let mut evm = solaris::evm();
 
-    let contract_owner_address: Address = 3.into();
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
 
-    let code_hex = include_str!("../contracts/test_sol_GetValueTest.bin");
+    let code_hex = include_str!("../contracts/GetValueTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
         .expect("contract deployment should succeed");
 
-    let contract = get_value_test::GetValueTest::default();
+    use get_value_test::functions;
 
     let value = solaris::wei::from_ether(1);
 
-    let output: U256 = evm.with_value(value)
+    let result_data = evm.with_value(value)
         .ensure_funds()
-        .call(contract.functions().get_value())
+        .call(functions::get_value::encode_input(), None)
+        .unwrap();
+    
+    let output: U256 = functions::get_value::decode_output(&result_data)
         .unwrap();
 
     assert_eq!(output, value);
@@ -93,50 +107,130 @@ fn msg_value_should_match_value_passed_into_with_value() {
 
 #[test]
 fn logs_should_get_collected_and_retrieved_correctly() {
-    let contract = event_log_test::EventLogTest::default();
-    let code_hex = include_str!("../contracts/test_sol_EventLogTest.bin");
+    let code_hex = include_str!("../contracts/EventLogTest.bin");
     let code_bytes = code_hex.from_hex().unwrap();
 
     let mut evm = solaris::evm();
 
-    let contract_owner_address: Address = 3.into();
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
 
     let _contract_address = evm.with_sender(contract_owner_address)
         .deploy(&code_bytes)
         .expect("contract deployment should succeed");
 
-    let fns = contract.functions();
+    use event_log_test::functions;
 
-    let first_sender_address = 10.into();
+    let first_sender_address = Address::from_low_u64_be(10);
     evm.with_sender(first_sender_address)
-        .transact(fns.emit_foo())
+        .transact(functions::emit_foo::encode_input(), None)
         .unwrap();
 
-    let second_sender_address = 11.into();
+    let second_sender_address = Address::from_low_u64_be(11);
     evm.with_sender(second_sender_address)
-        .transact(fns.emit_foo())
+        .transact(functions::emit_foo::encode_input(), None)
         .unwrap();
 
-    evm.transact(fns.emit_bar(100)).unwrap();
-    evm.transact(fns.emit_bar(101)).unwrap();
-    evm.transact(fns.emit_bar(102)).unwrap();
+    evm.transact(functions::emit_bar::encode_input(100), None).unwrap();
+    evm.transact(functions::emit_bar::encode_input(101), None).unwrap();
+    evm.transact(functions::emit_bar::encode_input(102), None).unwrap();
 
     // call should not show up in logs
-    evm.call(fns.emit_foo()).unwrap();
+    evm.call(functions::emit_foo::encode_input(), None)
+        .unwrap();
 
     assert_eq!(evm.raw_logs().len(), 5);
 
-    let foo_logs = evm.logs_for_event(contract.events().foo());
+    use event_log_test::events;
+
+    let foo_logs: Vec<event_log_test::logs::Foo> = evm.raw_logs()
+        .iter()
+        .filter_map(|log| events::foo::parse_log(log.clone()).ok())
+        .collect();
+
     assert_eq!(foo_logs.len(), 2);
     assert_eq!(Address::from(foo_logs[0].sender), first_sender_address);
     assert_eq!(Address::from(foo_logs[1].sender), second_sender_address);
 
-    let bar_logs = evm.logs_for_event(contract.events().bar());
+    let bar_logs: Vec<event_log_test::logs::Bar> = evm.raw_logs()
+        .iter()
+        .filter_map(|log| events::bar::parse_log(log.clone()).ok())
+        .collect();
+
     assert_eq!(bar_logs.len(), 3);
     assert_eq!(U256::from(bar_logs[0].value), U256::from(100));
     assert_eq!(U256::from(bar_logs[1].value), U256::from(101));
     assert_eq!(U256::from(bar_logs[2].value), U256::from(102));
 
-    let baz_logs = evm.logs_for_event(contract.events().baz());
+    let baz_logs: Vec<event_log_test::logs::Baz> = evm.raw_logs()
+        .iter()
+        .filter_map(|log| events::baz::parse_log(log.clone()).ok())
+        .collect();
+
     assert_eq!(baz_logs.len(), 0);
+}
+
+#[test]
+fn value_should_match_value_passed_into_constructor() {
+    let mut evm = solaris::evm();
+
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
+
+    let code_hex = include_str!("../contracts/ConstructorTest.bin");
+    let code_bytes = code_hex.from_hex().unwrap();
+    let constructor_bytes = constructor_test::constructor(code_bytes, 100);
+    let _contract_address = evm.with_sender(contract_owner_address)
+        .deploy(&constructor_bytes)
+        .expect("contract deployment should succeed");
+
+    use constructor_test::functions;
+
+    let result_data = evm
+        .ensure_funds()
+        .call(functions::get_value::encode_input(), None)
+        .unwrap();
+    
+    let output: U256 = functions::get_value::decode_output(&result_data)
+        .unwrap();
+
+    assert_eq!(output, U256::from(100));
+}
+
+#[test]
+fn deploy_contract_with_linking_library_should_succeed() {
+    let mut evm = solaris::evm();
+
+    let contract_owner_address: Address = Address::from_low_u64_be(3);
+
+    // deploy TestLibrary
+    let code_hex = include_str!("../contracts/TestLibrary.bin");
+    let code_bytes = code_hex.from_hex().unwrap();
+    let library_address = evm.with_sender(contract_owner_address)
+        .deploy(&code_bytes)
+        .expect("library deployment should succeed");
+
+    // link to deployed library
+    solc::link(
+        vec![format!("test.sol:TestLibrary:{:x}", library_address)],
+        "LibraryTest.bin".into(),
+        concat!(env!("CARGO_MANIFEST_DIR"), "/contracts/"));
+
+    // deploy LibraryTest
+    // can't use include_str because the bytecode is updated linking to library
+    let code_hex = fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/contracts/LibraryTest.bin")).unwrap();
+    let code_bytes = code_hex.from_hex().unwrap();
+    let _contract_address = evm.with_sender(contract_owner_address)
+        .deploy(&code_bytes)
+        .expect("contract deployment should succeed");
+
+    use library_test::functions;
+
+    let result_data = evm
+        .ensure_funds()
+        .call(functions::get_value_from_library::encode_input(), None)
+        .unwrap();
+    
+    let output: U256 = functions::get_value_from_library::decode_output(&result_data)
+        .unwrap();
+
+    assert_eq!(output, U256::from(300));
 }

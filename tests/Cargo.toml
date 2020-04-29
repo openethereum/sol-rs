@@ -4,11 +4,12 @@ version = "0.1.0"
 authors = ["Maximilian Krüger <kruemaxi@gmail.com>"]
 
 [dependencies]
-ethabi = { git = "https://github.com/paritytech/ethabi.git" }
-ethabi-derive = { git = "https://github.com/paritytech/ethabi.git" }
-ethabi-contract = { git = "https://github.com/paritytech/ethabi.git" }
+ethabi = "12.0.0"
+ethabi-derive = "12.0.0"
+ethabi-contract = "11.0.0"
 solaris = { path = "../solaris", version = "0.1" }
-ethereum-types = "0.3"
+solc = { path = "../solc", version = "0.1" }
+ethereum-types = "0.9.0"
 rustc-hex = "1.0"
 
 [build-dependencies]
